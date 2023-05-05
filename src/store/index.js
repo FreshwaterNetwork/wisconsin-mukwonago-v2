@@ -56,6 +56,7 @@ export default createStore({
     selectedFeatures: [],
     locationValue: '',
     removeHighlight: false,
+    mapQuery: '',
   },
   mutations: {
     //data retrieved from web services
@@ -102,6 +103,9 @@ export default createStore({
     },
     updateRemoveHighlight(state, val) {
       state.removeHighlight = val;
+    },
+    updateMapQuery(state, val) {
+      state.mapQuery = val;
     },
   },
 

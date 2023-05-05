@@ -6,6 +6,15 @@
         explore the impact of nearby high capacity pumping.
       </b>
     </p>
+    <q-select
+      v-model="featureSelect"
+      rounded
+      multiple
+      outlined
+      :options="featureOptions"
+      label="Select Feature(s)"
+      style="width:300px; display:block; margin:auto auto 10px auto;"
+    />
     <p style="margin-bottom:0px;">
       <b>What is the yearly average pumping rate for the well?</b>
     </p>
@@ -29,10 +38,9 @@
       dense
       label="Select a Pumping Rate"
       style="width:200px; display:block; margin:auto;"
-      for="pump-rate"
     />
     <p
-      v-if="!noGPM"
+      v-if="!noGPM && !featureSelect"
       style="color: red; margin-bottom: 0px;"
       class="text-center q-mt-sm"
     >
@@ -41,11 +49,8 @@
     </p>
 
     <!-- Data Table -->
-    <div
-      class="q-pa-md"
-      :style="!selectedFeatures ? 'overflow-y: scroll;' : ''"
-    >
-      <q-markup-table v-if="selectedFeatures != ''">
+    <div class="q-pa-md" :style="!featureSelect ? 'overflow-y: scroll;' : ''">
+      <q-markup-table v-if="featureSelect != ''">
         <thead>
           <tr>
             <th>Feature Name</th>
@@ -113,15 +118,15 @@
                 </p>
                 <q-img
                   :src="'/img/icons/wss-cycle-diagram.jpg'"
-                  style="height: 350px;"
+                  style="height: auto; width: 400px; margin:auto; display:block;"
                 />
               </div>
             </q-card-section>
           </q-card>
         </q-dialog>
         <tbody>
-          <tr v-for="(feat, index) in selectedFeatures" :key="feat">
-            <td>{{ feat.CommonName }}</td>
+          <tr v-for="(feat, index) in featureSelect" :key="feat">
+            <td>{{ feat.label }}</td>
             <td></td>
             <td>
               <q-btn
@@ -169,11 +174,45 @@ export default {
         { label: '75 gpm', value: '75' },
         { label: '100 gpm', value: '100' },
       ],
+      featureOptions: [
+        { label: 'Muk R. at Bluff Rd' },
+        { label: 'Muk Trib below Bluff Rd Fen' },
+        { label: 'Muk R. below Bluff Rd Fen' },
+        { label: 'Muk R. at Lulu Lake' },
+        { label: 'Muk R. at Eagle Spring Lake' },
+        { label: 'Jericho Ck at Co Rd NN' },
+        { label: 'Jericho Ck at Co Rd LO' },
+        { label: 'Muk R. below Eagle Spring Lake' },
+        { label: 'Muk R. at Rainbow Spring Rd' },
+        { label: 'Muk Trib at Town Line Rd' },
+        { label: 'Muk Trib below Lake Beulah' },
+        { label: 'Muk Trib at Muk R.' },
+        { label: 'Muk R. below Beulah Rd' },
+        { label: 'Muk R. at Lower Phantom Lake' },
+        { label: 'Muk R. below Lower Phantom Lake' },
+        { label: 'Muk R. below Holz Pkwy' },
+        { label: 'Muk Trub below I43' },
+        { label: 'Muk R. at Fox R.' },
+        { label: 'Rainbow Springs Lake' },
+        { label: 'Pickerel Lake' },
+        { label: 'Lulu Lake' },
+        { label: 'Eagle Spring Lake' },
+        { label: 'Phantom Lake' },
+        { label: 'Lake Beulah/Army Lake' },
+        { label: 'Pickerel Lake Fen' },
+        { label: 'Bluff Rd Fen' },
+        { label: 'Lulu Lake Fen' },
+        { label: 'Lakewood Fen' },
+        { label: 'Meyer Sedge Fen' },
+        { label: 'Jericho Creek Fen' },
+      ],
       infoVis: false,
       buttonCol: false,
       activeIndex: -1,
       pumpRateValue: '',
       noGPM: false,
+      mapQuery: '',
+      featureSelect: [],
     };
   },
   computed: {
@@ -191,21 +230,29 @@ export default {
   },
   methods: {
     removeSelected(val) {
-      const index = this.selectedFeatures.indexOf(val);
+      const index = this.featureSelect.indexOf(val);
       if (index !== -1) {
-        this.selectedFeatures.splice(index, 1);
+        this.featureSelect.splice(index, 1);
       }
       this.removeHighlight = true;
     },
     showRemoveLayer(val) {
       if (this.buttonCol === true) {
-        const index = this.selectedFeatures.indexOf(val);
+        const index = this.featureSelect.indexOf(val);
         if (index !== -1) {
-          console.log('GPM layer added to map');
-          // this.buttonCol === true;
+          this.featureSelect.forEach((feat) => {
+            console.log('GPM layer added to map');
+            this.mapQuery =
+              feat.label +
+              ' - Depletion - ' +
+              this.pumpRateValue.value +
+              ' gpm';
+            this.updateMapQuery(this.mapQuery);
+            console.log(this.mapQuery);
+          });
         }
       } else {
-        const index = this.selectedFeatures.indexOf(val);
+        const index = this.featureSelect.indexOf(val);
         if (index !== -1) {
           console.log('GPM layer removed from map');
           // this.buttonCol === false;
@@ -233,6 +280,9 @@ export default {
         console.log('No GPM selected.');
         this.noGPM = false;
       }
+    },
+    updateMapQuery() {
+      this.$store.commit('updateMapQuery');
     },
   },
 };
