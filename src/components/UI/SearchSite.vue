@@ -30,17 +30,15 @@
     </p>
 
     <!-- Pump rate selector  -->
-    <q-select
+    <q-btn-toggle
       v-model="pumpRateValue"
-      rounded
-      outlined
+      toggle-color="primary"
       :options="searchOptions"
-      dense
-      label="Select a Pumping Rate"
-      style="width:200px; display:block; margin:auto;"
+      spread
+      style="margin: auto;"
     />
     <p
-      v-if="!noGPM && !featureSelect"
+      v-if="!pumpRateValue || featureSelect == ''"
       style="color: red; margin-bottom: 0px;"
       class="text-center q-mt-sm"
     >
@@ -49,8 +47,11 @@
     </p>
 
     <!-- Data Table -->
-    <div class="q-pa-md" :style="!featureSelect ? 'overflow-y: scroll;' : ''">
-      <q-markup-table v-if="featureSelect != ''">
+    <div class="q-pa-md">
+      <q-markup-table
+        v-if="featureSelect != ''"
+        :style="!featureSelect ? 'overflow-y: scroll;' : ''"
+      >
         <thead>
           <tr>
             <th>Feature Name</th>
@@ -125,19 +126,39 @@
           </q-card>
         </q-dialog>
         <tbody>
-          <tr v-for="(feat, index) in featureSelect" :key="feat">
-            <td>{{ feat.label }}</td>
+          <tr v-for="(feat, index) in featureSelect" :key="index">
+            <td id="feature-label">{{ feat.label }}</td>
             <td></td>
             <td>
               <q-btn
+                v-if="
+                  feat.display != true &&
+                    feat.btn != true &&
+                    this.mapQuery === ''
+                "
+                :key="index"
                 size="10px"
                 color="secondary"
+                :disable="this.pumpRateValue === '' ? true : false"
                 icon="map"
                 style="display: block; margin: auto;"
                 :class="{ active: activeIndex === index }"
+                @click="toggleActive(feat, index)"
+              ></q-btn>
+              <q-btn
+                v-if="feat.btn === true"
+                :key="index"
+                size="10px"
+                color="red"
+                icon="map"
+                :disable="feat.display === true ? false : true"
+                style="display: block; margin: auto;"
+                :class="{ active: activeIndex === index }"
                 @click="
-                  toggleActive(index);
-                  showRemoveLayer(feat);
+                  feat.btn = false;
+                  feat.display = false;
+                  this.addRaster = false;
+                  this.mapQuery = '';
                 "
               ></q-btn>
             </td>
@@ -175,43 +196,46 @@ export default {
         { label: '100 gpm', value: '100' },
       ],
       featureOptions: [
-        { label: 'Muk R. at Bluff Rd' },
-        { label: 'Muk Trib below Bluff Rd Fen' },
-        { label: 'Muk R. below Bluff Rd Fen' },
-        { label: 'Muk R. at Lulu Lake' },
-        { label: 'Muk R. at Eagle Spring Lake' },
-        { label: 'Jericho Ck at Co Rd NN' },
-        { label: 'Jericho Ck at Co Rd LO' },
-        { label: 'Muk R. below Eagle Spring Lake' },
-        { label: 'Muk R. at Rainbow Spring Rd' },
-        { label: 'Muk Trib at Town Line Rd' },
-        { label: 'Muk Trib below Lake Beulah' },
-        { label: 'Muk Trib at Muk R.' },
-        { label: 'Muk R. below Beulah Rd' },
-        { label: 'Muk R. at Lower Phantom Lake' },
-        { label: 'Muk R. below Lower Phantom Lake' },
-        { label: 'Muk R. below Holz Pkwy' },
-        { label: 'Muk Trub below I43' },
-        { label: 'Muk R. at Fox R.' },
-        { label: 'Rainbow Springs Lake' },
-        { label: 'Pickerel Lake' },
-        { label: 'Lulu Lake' },
-        { label: 'Eagle Spring Lake' },
-        { label: 'Phantom Lake' },
-        { label: 'Lake Beulah/Army Lake' },
-        { label: 'Pickerel Lake Fen' },
-        { label: 'Bluff Rd Fen' },
-        { label: 'Lulu Lake Fen' },
-        { label: 'Lakewood Fen' },
-        { label: 'Meyer Sedge Fen' },
-        { label: 'Jericho Creek Fen' },
+        { label: 'Muk R. at Bluff Rd', display: false, btn: false },
+        { label: 'Muk Trib below Bluff Rd Fen', display: false, btn: false },
+        { label: 'Muk R. below Bluff Rd Fen', display: false, btn: false },
+        { label: 'Muk R. at Lulu Lake', display: false, btn: false },
+        { label: 'Muk R. at Eagle Spring Lake', display: false, btn: false },
+        { label: 'Jericho Ck at Co Rd NN', display: false, btn: false },
+        { label: 'Jericho Ck at Co Rd LO', display: false, btn: false },
+        { label: 'Muk R. below Eagle Spring Lake', display: false, btn: false },
+        { label: 'Muk R. at Rainbow Spring Rd', display: false, btn: false },
+        { label: 'Muk Trib at Town Line Rd', display: false, btn: false },
+        { label: 'Muk Trib below Lake Beulah', display: false, btn: false },
+        { label: 'Muk Trib at Muk R.', display: false, btn: false },
+        { label: 'Muk R. below Beulah Rd', display: false, btn: false },
+        { label: 'Muk R. at Lower Phantom Lake', display: false, btn: false },
+        {
+          label: 'Muk R. below Lower Phantom Lake',
+          display: false,
+          btn: false,
+        },
+        { label: 'Muk R. below Holz Pkwy', display: false, btn: false },
+        { label: 'Muk Trub below I43', display: false, btn: false },
+        { label: 'Muk R. at Fox R.', display: false, btn: false },
+        { label: 'Rainbow Springs Lake', display: false, btn: false },
+        { label: 'Pickerel Lake', display: false, btn: false },
+        { label: 'Lulu Lake', display: false, btn: false },
+        { label: 'Eagle Spring Lake', display: false, btn: false },
+        { label: 'Phantom Lake', display: false, btn: false },
+        { label: 'Lake Beulah/Army Lake', display: false, btn: false },
+        { label: 'Pickerel Lake Fen', display: false, btn: false },
+        { label: 'Bluff Rd Fen', display: false, btn: false },
+        { label: 'Lulu Lake Fen', display: false, btn: false },
+        { label: 'Lakewood Fen', display: false, btn: false },
+        { label: 'Meyer Sedge Fen', display: false, btn: false },
+        { label: 'Jericho Creek Fen', display: false, btn: false },
       ],
       infoVis: false,
       buttonCol: false,
       activeIndex: -1,
       pumpRateValue: '',
       noGPM: false,
-      mapQuery: '',
       featureSelect: [],
     };
   },
@@ -219,12 +243,20 @@ export default {
     selectedFeatures() {
       return this.$store.state.selectedFeatures;
     },
-    removeHighlight: {
+    mapQuery: {
       get() {
-        return this.$store.state.removeHighlight;
+        return this.$store.state.mapQuery;
       },
       set(value) {
-        this.$store.commit('updateRemoveHighlight', value);
+        this.$store.commit('updateMapQuery', value);
+      },
+    },
+    addRaster: {
+      get() {
+        return this.$store.state.addRaster;
+      },
+      set(value) {
+        this.$store.commit('updateAddRaster', value);
       },
     },
   },
@@ -233,56 +265,65 @@ export default {
       const index = this.featureSelect.indexOf(val);
       if (index !== -1) {
         this.featureSelect.splice(index, 1);
+        this.mapQuery = '';
       }
-      this.removeHighlight = true;
+      this.addRaster = false;
     },
-    showRemoveLayer(val) {
-      if (this.buttonCol === true) {
-        const index = this.featureSelect.indexOf(val);
-        if (index !== -1) {
-          this.featureSelect.forEach((feat) => {
-            console.log('GPM layer added to map');
-            this.mapQuery =
-              feat.label +
-              ' - Depletion - ' +
-              this.pumpRateValue.value +
-              ' gpm';
-            this.updateMapQuery(this.mapQuery);
-            console.log(this.mapQuery);
-          });
-        }
-      } else {
-        const index = this.featureSelect.indexOf(val);
-        if (index !== -1) {
-          console.log('GPM layer removed from map');
-          // this.buttonCol === false;
-        }
-      }
-    },
-    toggleActive(index) {
+    // showLayer(val) {
+    //   if (this.addRaster === true) {
+    //     const index = this.featureSelect.indexOf(val);
+    //     console.log(this.mapQuery);
+    //     if (index !== -1) {
+    //       this.featureSelect.forEach((feat) => {
+    //         console.log('GPM layer added to map');
+    //         let query =
+    //           feat.label + ' - Depletion - ' + this.pumpRateValue + ' gpm';
+    //         if (feat.display === true) {
+    //           this.mapQuery = query;
+    //         }
+    //       });
+    //     }
+    //   } else {
+    //     const index = this.featureSelect.indexOf(val);
+    //     if (index !== -1) {
+    //       console.log('GPM layer removed from map');
+    //     }
+    //   }
+    // },
+    toggleActive(val, index) {
       this.activeIndex = this.activeIndex === index ? -1 : index;
-      this.buttonCol = !this.buttonCol;
-      let gpm = this.pumpRateValue.value;
-      if (gpm) {
+      this.addRaster = true;
+      let gpm = this.pumpRateValue;
+      val.display = true;
+      val.btn = true;
+
+      if (gpm != '' && this.addRaster === true) {
         console.log(gpm);
         this.noGPM = true;
+        this.featureSelect.forEach((a) => {
+          console.log(a);
+          console.log(this.addRaster);
+          console.log(a.display);
+
+          if (a.display === true) {
+            console.log('GPM layer added to map');
+            let query =
+              a.label + ' - Depletion - ' + this.pumpRateValue + ' gpm';
+            this.mapQuery = query;
+            console.log(this.mapQuery);
+          }
+        });
       } else {
         console.log('No GPM selected.');
         this.noGPM = false;
       }
     },
-    gpmValue() {
-      let gpm = this.pumpRateValue.value;
-      if (gpm) {
-        console.log(gpm);
-        this.noGPM = true;
-      } else {
-        console.log('No GPM selected.');
-        this.noGPM = false;
+  },
+  watch: {
+    featureSelect() {
+      if (this.addRaster === true) {
+        this.addRaster = false;
       }
-    },
-    updateMapQuery() {
-      this.$store.commit('updateMapQuery');
     },
   },
 };

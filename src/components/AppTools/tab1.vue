@@ -14,9 +14,9 @@
     <!-- <div class="text-subtitle2">Start Exploring:</div> -->
     <div v-for="app in appOptions" :key="app" class="app-option q-my-sm">
       <strong>
-        <center>
+        <div class="text-center">
           {{ app.name }}
-        </center>
+        </div>
       </strong>
       <hr />
       <div>{{ app.description }}</div>

@@ -57,6 +57,7 @@ export default createStore({
     locationValue: '',
     removeHighlight: false,
     mapQuery: '',
+    addRaster: false,
   },
   mutations: {
     //data retrieved from web services
@@ -106,6 +107,9 @@ export default createStore({
     },
     updateMapQuery(state, val) {
       state.mapQuery = val;
+    },
+    updateAddRaster(state, val) {
+      state.addRaster = val;
     },
   },
 

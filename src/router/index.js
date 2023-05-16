@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import EvaluateSite from '../components/UI/EvaluateSite.vue';
 import SearchSite from '../components/UI/SearchSite.vue';
+import tabsVertical from '../components/UI/ThePanelTabsVertical.vue';
 
 const routes = [
   // {
@@ -22,10 +23,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "about" */ '../components/UI/ThePanelTabsVertical.vue'
-      ),
+    component: tabsVertical,
   },
   {
     path: '/tab2',
@@ -33,10 +31,7 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "about" */ '../components/UI/ThePanelTabsVertical.vue'
-      ),
+    component: tabsVertical,
   },
   {
     path: '/tab3',
@@ -44,19 +39,16 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(
-        /* webpackChunkName: "about" */ '../components/UI/ThePanelTabsVertical.vue'
-      ),
+    component: tabsVertical,
     children: [
       {
-        path: '/tab3/evaluate',
-        name: 'evaluate',
+        path: 'evaluate',
+        name: 'EvaluateSite',
         component: EvaluateSite,
       },
       {
-        path: '/tab3/search',
-        name: 'search',
+        path: 'search',
+        name: 'SearchSite',
         component: SearchSite,
       },
     ],

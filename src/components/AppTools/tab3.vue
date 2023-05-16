@@ -7,9 +7,9 @@
     <div class="user-agreement" v-if="agreed === false">
       <span>
         <strong>
-          <center>
+          <div class="text-center">
             Protecting Groundwater Dependent Ecosystems Intended Use Agreement
-          </center>
+          </div>
         </strong>
       </span>
       <br />
@@ -51,7 +51,6 @@
             color="primary"
             label="Evaluate a Planned Pumping Site"
             to="/tab3/evaluate"
-            @click="planType = 'evaluate'"
           />
           <q-btn
             color="primary"
@@ -69,9 +68,6 @@
 <script>
 export default {
   name: 'tab3',
-  components: {},
-  data() {},
-  methods: {},
   computed: {
     planType: {
       get() {
