@@ -2,8 +2,8 @@
   <div>
     <p class="q-mt-sm">
       <b>
-        By clicking on the map, select one or more features of interest to
-        explore the impact of nearby high capacity pumping.
+        Select one or more features of interest from the drop down to explore
+        the impact of nearby high capacity pumping.
       </b>
     </p>
     <q-select
@@ -146,20 +146,18 @@
                 @click="toggleActive(feat, index)"
               ></q-btn>
               <q-btn
-                v-if="feat.btn === true"
+                v-if="
+                  feat.btn === true &&
+                    feat.display === true &&
+                    this.mapQuery != ''
+                "
                 :key="index"
                 size="10px"
-                color="red"
+                color="primary"
                 icon="map"
-                :disable="feat.display === true ? false : true"
                 style="display: block; margin: auto;"
                 :class="{ active: activeIndex === index }"
-                @click="
-                  feat.btn = false;
-                  feat.display = false;
-                  this.addRaster = false;
-                  this.mapQuery = '';
-                "
+                @click="removeRaster(feat)"
               ></q-btn>
             </td>
             <td>
@@ -237,6 +235,8 @@ export default {
       pumpRateValue: '',
       noGPM: false,
       featureSelect: [],
+      featureChoice: '',
+      gpmVal: '',
     };
   },
   computed: {
@@ -266,64 +266,51 @@ export default {
       if (index !== -1) {
         this.featureSelect.splice(index, 1);
         this.mapQuery = '';
+        this.addRaster = false;
+        val.display = false;
+        val.btn = false;
       }
-      this.addRaster = false;
     },
-    // showLayer(val) {
-    //   if (this.addRaster === true) {
-    //     const index = this.featureSelect.indexOf(val);
-    //     console.log(this.mapQuery);
-    //     if (index !== -1) {
-    //       this.featureSelect.forEach((feat) => {
-    //         console.log('GPM layer added to map');
-    //         let query =
-    //           feat.label + ' - Depletion - ' + this.pumpRateValue + ' gpm';
-    //         if (feat.display === true) {
-    //           this.mapQuery = query;
-    //         }
-    //       });
-    //     }
-    //   } else {
-    //     const index = this.featureSelect.indexOf(val);
-    //     if (index !== -1) {
-    //       console.log('GPM layer removed from map');
-    //     }
-    //   }
-    // },
     toggleActive(val, index) {
       this.activeIndex = this.activeIndex === index ? -1 : index;
       this.addRaster = true;
-      let gpm = this.pumpRateValue;
-      val.display = true;
+      this.featureChoice = val.label;
+      this.gpmVal = this.pumpRateValue;
+      this.mapQuery = '';
       val.btn = true;
+      val.display = true;
 
-      if (gpm != '' && this.addRaster === true) {
-        console.log(gpm);
-        this.noGPM = true;
-        this.featureSelect.forEach((a) => {
-          console.log(a);
-          console.log(this.addRaster);
-          console.log(a.display);
+      if (this.mapQuery === '') {
+        this.mapQuery =
+          this.featureChoice + ' - Depletion - ' + this.gpmVal + ' gpm';
 
-          if (a.display === true) {
-            console.log('GPM layer added to map');
-            let query =
-              a.label + ' - Depletion - ' + this.pumpRateValue + ' gpm';
-            this.mapQuery = query;
-            console.log(this.mapQuery);
-          }
-        });
-      } else {
-        console.log('No GPM selected.');
-        this.noGPM = false;
+        console.log(this.gpmVal);
+        console.log(this.featureChoice);
+        console.log(this.mapQuery);
       }
+    },
+    removeRaster(val, index) {
+      this.activeIndex = this.activeIndex === index ? -1 : index;
+      val.btn = false;
+      val.display = false;
+      this.mapQuery = '';
+      this.addRaster = false;
+
+      console.log(val.btn);
+      console.log(val.display);
+      console.log(this.addRaster);
+      console.log(this.mapQuery);
     },
   },
   watch: {
     featureSelect() {
       if (this.addRaster === true) {
         this.addRaster = false;
+        this.mapQuery = '';
       }
+    },
+    addRaster() {
+      this.$store.commit('updateAddRaster', this.addRaster);
     },
   },
 };

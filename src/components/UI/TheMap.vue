@@ -47,6 +47,10 @@ import ScaleBar from '@arcgis/core/widgets/ScaleBar';
 import Search from '@arcgis/core/widgets/Search.js';
 import PortalBasemapsSource from '@arcgis/core/widgets/BasemapGallery/support/PortalBasemapsSource';
 import Portal from '@arcgis/core/portal/Portal';
+import Graphic from '@arcgis/core/Graphic.js';
+import Circle from '@arcgis/core/geometry/Circle.js';
+import Point from '@arcgis/core/geometry/Point.js';
+import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol.js';
 // import FeatureFilter from '@arcgis/core/layers/support/FeatureFilter';
 // import FeatureEffect from '@arcgis/core/layers/support/FeatureEffect';
 
@@ -59,6 +63,7 @@ let esri = {
   map: '',
   measurement: '',
   lgExpand: '',
+  mapImage: '',
 };
 
 export default {
@@ -71,6 +76,34 @@ export default {
     return {
       active: true,
       locationValue: '',
+      upstreamFeatures: [
+        { st: 'sfr_1', qt: 'Muk R. at Fox R.' },
+        { st: 'sfr_2', qt: 'Muk Trib below I43' },
+        { st: 'sfr_3', qt: 'Muk R. below Holz Pkwy' },
+        { st: 'sfr_4', qt: 'Muk R. below Lower Phantom Lake' },
+        { st: 'sfr_5', qt: 'Muk R. at Lower Phantom Lake' },
+        { st: 'sfr_6', qt: 'Muk R. below Beulah Rd' },
+        { st: 'sfr_7', qt: 'Muk Trib at Muk R.' },
+        { st: 'sfr_8', qt: 'Muk Trib below Lake Beulah' },
+        { st: 'sfr_9', qt: 'Muk Trib at Town Line Rd' },
+        { st: 'sfr_10', qt: 'Muk R. at Rainbow Spring Rd' },
+        { st: 'sfr_11', qt: 'Muk R. below Eagle Spring Lake' },
+        { st: 'sfr_12', qt: 'Jericho Ck at Co Rd LO' },
+        { st: 'sfr_13', qt: 'Jericho Ck at Co Rd NN' },
+        { st: 'sfr_14', qt: 'Muk R. at Eagle Spring Lake' },
+        { st: 'sfr_15', qt: 'Muk R. at Lulu Lake' },
+        { st: 'sfr_16', qt: 'Muk R. below Bluff Rd Fen' },
+        { st: 'sfr_17', qt: 'Muk Trib below Bluff Rd Fen' },
+        { st: 'sfr_18', qt: 'Muk R. at Bluff Rd' },
+        { st: 'lk1', qt: 'Lake Beulah/Army Lake' },
+        { st: 'lk2', qt: 'Phantom Lake' },
+        { st: 'lk3', qt: 'Eagle Spring Lake' },
+        { st: 'lk4', qt: 'Lulu Lake' },
+        { st: 'lk5', qt: 'Pickerel Lake' },
+        { st: 'lk6', qt: 'Rainbow Springs Lake' },
+        { st: 'lk7', qt: '' },
+        { st: 'lk8', qt: '' },
+      ],
     };
   },
   computed: {
@@ -94,6 +127,41 @@ export default {
     addRaster() {
       return this.$store.state.addRaster;
     },
+    planType() {
+      return this.$store.state.planType;
+    },
+    pointCoord: {
+      get() {
+        return this.$store.state.pointCoord;
+      },
+      set(value) {
+        this.$store.commit('updatePointCoord', value);
+      },
+    },
+    evalCircle: {
+      get() {
+        return this.$store.state.evalCircle;
+      },
+      set(value) {
+        this.$store.commit('updateEvalCircle', value);
+      },
+    },
+    circleFeatures: {
+      get() {
+        return this.$store.state.circleFeatures;
+      },
+      set(value) {
+        this.$store.commit('updateCircleFeatures', value);
+      },
+    },
+    resultsFeatures: {
+      get() {
+        return this.$store.state.resultsFeatures;
+      },
+      set(value) {
+        this.$store.commit('updateResultsFeatures', value);
+      },
+    },
   },
   watch: {
     supportingMapVisibleLayers() {
@@ -103,651 +171,77 @@ export default {
       this.updateSupportingOpacity();
     },
     addRaster() {
-      const mapImage = new MapImageLayer({
-        url:
-          'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer',
-        sublayers: [
-          {
-            id: 8,
-            title: 'Muk R. at Bluff Rd - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 9,
-            title: 'Muk R. at Bluff Rd - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 10,
-            title: 'Muk R. at Bluff Rd - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 11,
-            title: 'Muk R. at Bluff Rd - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 12,
-            title: 'Muk Trib below Bluff Rd Fen - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 13,
-            title: 'Muk Trib below Bluff Rd Fen - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 14,
-            title: 'Muk Trib below Bluff Rd Fen - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 15,
-            title: 'Muk Trib below Bluff Rd Fen - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 16,
-            title: 'Muk R. below Bluff Rd Fen - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 17,
-            title: 'Muk R. below Bluff Rd Fen - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 18,
-            title: 'Muk R. below Bluff Rd Fen - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 19,
-            title: 'Muk R. below Bluff Rd Fen - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 20,
-            title: 'Muk R. at Lulu Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 21,
-            title: 'Muk R. at Lulu Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 22,
-            title: 'Muk R. at Lulu Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 23,
-            title: 'Muk R. at Lulu Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 24,
-            title: 'Muk R. at Eagle Spring Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 25,
-            title: 'Muk R. at Eagle Spring Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 26,
-            title: 'Muk R. at Eagle Spring Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 27,
-            title: 'Muk R. at Eagle Spring Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 28,
-            title: 'Jericho Ck at Co Rd NN - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 29,
-            title: 'Jericho Ck at Co Rd NN - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 30,
-            title: 'Jericho Ck at Co Rd NN - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 31,
-            title: 'Jericho Ck at Co Rd NN - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 32,
-            title: 'Jericho Ck at Co Rd LO - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 33,
-            title: 'Jericho Ck at Co Rd LO - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 34,
-            title: 'Jericho Ck at Co Rd LO - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 35,
-            title: 'Jericho Ck at Co Rd LO - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 36,
-            title: 'Muk R. below Eagle Spring Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 37,
-            title: 'Muk R. below Eagle Spring Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 38,
-            title: 'Muk R. below Eagle Spring Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 39,
-            title: 'Muk R. below Eagle Spring Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 40,
-            title: 'Muk R. at Rainbow Spring Rd - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 41,
-            title: 'Muk R. at Rainbow Spring Rd - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 42,
-            title: 'Muk R. at Rainbow Spring Rd - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 43,
-            title: 'Muk R. at Rainbow Spring Rd - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 44,
-            title: 'Muk Trib at Town Line Rd - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 45,
-            title: 'Muk Trib at Town Line Rd - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 46,
-            title: 'Muk Trib at Town Line Rd - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 47,
-            title: 'Muk Trib at Town Line Rd - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 48,
-            title: 'Muk Trib below Lake Beulah - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 49,
-            title: 'Muk Trib below Lake Beulah - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 50,
-            title: 'Muk Trib below Lake Beulah - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 51,
-            title: 'Muk Trib below Lake Beulah - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 52,
-            title: 'Muk Trib at Muk R. - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 53,
-            title: 'Muk Trib at Muk R. - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 54,
-            title: 'Muk Trib at Muk R. - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 55,
-            title: 'Muk Trib at Muk R. - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 56,
-            title: 'Muk R. below Beulah Rd - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 57,
-            title: 'Muk R. below Beulah Rd - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 58,
-            title: 'Muk R. below Beulah Rd - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 59,
-            title: 'Muk R. below Beulah Rd - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 60,
-            title: 'Muk R. at Lower Phantom Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 61,
-            title: 'Muk R. at Lower Phantom Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 62,
-            title: 'Muk R. at Lower Phantom Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 63,
-            title: 'Muk R. at Lower Phantom Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 64,
-            title: 'Muk R. below Lower Phantom Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 65,
-            title: 'Muk R. below Lower Phantom Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 66,
-            title: 'Muk R. below Lower Phantom Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 67,
-            title: 'Muk R. below Lower Phantom Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 68,
-            title: 'Muk R. below Holz Pkwy - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 69,
-            title: 'Muk R. below Holz Pkwy - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 70,
-            title: 'Muk R. below Holz Pkwy - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 71,
-            title: 'Muk R. below Holz Pkwy - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 72,
-            title: 'Muk Trib below I43 - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 73,
-            title: 'Muk Trib below I43 - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 74,
-            title: 'Muk Trib below I43 - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 75,
-            title: 'Muk Trib below I43 - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 76,
-            title: 'Muk R. at Fox R. - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 77,
-            title: 'Muk R. at Fox R. - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 78,
-            title: 'Muk R. at Fox R. - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 79,
-            title: 'Muk R. at Fox R. - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 80,
-            title: 'Rainbow Springs Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 81,
-            title: 'Rainbow Springs Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 82,
-            title: 'Rainbow Springs Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 83,
-            title: 'Rainbow Springs Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 84,
-            title: 'Pickerel Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 85,
-            title: 'Pickerel Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 86,
-            title: 'Pickerel Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 87,
-            title: 'Pickerel Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 88,
-            title: 'Lulu Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 89,
-            title: 'Lulu Lake - Depletion - 700 gpm',
-            visible: false,
-          },
-          {
-            id: 90,
-            title: 'Lulu Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 91,
-            title: 'Lulu Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 92,
-            title: 'Lulu Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 93,
-            title: 'Eagle Spring Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 94,
-            title: 'Eagle Spring Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 95,
-            title: 'Eagle Spring Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 96,
-            title: 'Eagle Spring Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 97,
-            title: 'Phantom Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 98,
-            title: 'Phantom Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 99,
-            title: 'Phantom Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 100,
-            title: 'Phantom Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 101,
-            title: 'Lake Beulah/Army Lake - Depletion - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 102,
-            title: 'Lake Beulah/Army Lake - Depletion - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 103,
-            title: 'Lake Beulah/Army Lake - Depletion - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 104,
-            title: 'Lake Beulah/Army Lake - Depletion - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 105,
-            title: 'Pickerel Lake Fen - Drawdown - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 106,
-            title: 'Pickerel Lake Fen - Drawdown - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 107,
-            title: 'Pickerel Lake Fen - Drawdown - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 108,
-            title: 'Pickerel Lake Fen - Drawdown - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 109,
-            title: 'Bluff Road Fen - Drawdown - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 110,
-            title: 'Bluff Road Fen - Drawdown - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 111,
-            title: 'Bluff Road Fen - Drawdown - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 112,
-            title: 'Bluff Road Fen - Drawdown - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 113,
-            title: 'Lulu Lake Fen - Drawdown - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 114,
-            title: 'Lulu Lake Fen - Drawdown - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 115,
-            title: 'Lulu Lake Fen - Drawdown - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 116,
-            title: 'Lulu Lake Fen - Drawdown - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 117,
-            title: 'Lakewood Fen - Drawdown - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 118,
-            title: 'Lakewood Fen - Drawdown - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 119,
-            title: 'Lakewood Fen - Drawdown - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 120,
-            title: 'Lakewood Fen - Drawdown - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 121,
-            title: 'Meyer Sedge Fen - Drawdown - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 122,
-            title: 'Meyer Sedge Fen - Drawdown - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 123,
-            title: 'Meyer Sedge Fen - Drawdown - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 124,
-            title: 'Meyer Sedge Fen - Drawdown - 100 gpm',
-            visible: false,
-          },
-          {
-            id: 125,
-            title: 'Jericho Creek Fen - Drawdown - 75 gpm',
-            visible: false,
-          },
-          {
-            id: 126,
-            title: 'Jericho Creek Fen - Drawdown - 50 gpm',
-            visible: false,
-          },
-          {
-            id: 127,
-            title: 'Jericho Creek Fen - Drawdown - 25 gpm',
-            visible: false,
-          },
-          {
-            id: 128,
-            title: 'Jericho Creek Fen - Drawdown - 100 gpm',
-            visible: false,
-          },
-        ],
-      });
-
-      esri.map.add(mapImage);
-
-      let _this = this;
       let queryTitle = '';
       let layerTitle = '';
 
-      if (_this.addRaster === true) {
-        console.log(_this.mapQuery);
+      const srf_lakes = new FeatureLayer({
+        url:
+          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/6',
+      });
 
-        mapImage.sublayers.forEach((sub) => {
+      const srf_streams = new FeatureLayer({
+        url:
+          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/7',
+      });
+
+      const queryLakes = srf_lakes.createQuery();
+      const queryStreams = srf_streams.createQuery();
+      let upstreamLayer = [];
+
+      srf_lakes.queryFeatures(queryLakes).then(function(result) {
+        upstreamLayer.push(result.features);
+      });
+
+      srf_streams.queryFeatures(queryStreams).then(function(result) {
+        upstreamLayer.push(result.features);
+      });
+
+      console.log(upstreamLayer);
+
+      if (this.addRaster === true) {
+        console.log(this.mapQuery);
+
+        esri.mapImage.sublayers.forEach((sub) => {
           layerTitle = sub.title;
-          queryTitle = _this.mapQuery;
-
-          console.log(queryTitle);
-
-          // let sublayer = mapImage.sublayers.getItemAt(layID);
+          queryTitle = this.mapQuery;
           sub.visible = false;
 
           if (queryTitle === layerTitle) {
             sub.visible = true;
+            console.log(sub);
           } else {
             sub.visible = false;
           }
         });
       }
-      if (_this.addRaster === false) {
-        mapImage.sublayers.forEach((sub) => {
-          if (sub.visible === true) {
-            sub.visible = false;
-          }
+      if (this.addRaster === false) {
+        console.log(this.addRaster);
+        esri.mapImage.sublayers.forEach((sub) => {
+          console.log(sub.visible);
+          sub.visible = false;
         });
       }
     },
+    // evalCircle() {
+    //   if (this.evalCircle === true) {
+    //     esri.mapView.on('pointer-move', (response) => {
+    //       const opts = {
+    //         include: muk_srlLayerView,
+    //         muk_fensLayerView,
+    //         muk_lakesLayerView,
+    //       };
+    //       esri.mapView.hitTest(response, opts).then((e) => {
+    //         if (e.results.length) {
+    //           const hitGraphic = e.results[0].graphic;
+    //           console.log(hitGraphic);
+    //           // opts.forEach((layer) => {
+    //           //   layer.highlight()
+    //           // })
+    //         }
+    //       });
+    //     });
+    //   }
+    // },
   },
 
   mounted() {
@@ -839,7 +333,7 @@ export default {
 
     const muk_watershed = new FeatureLayer({
       url:
-        'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer/0',
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/0',
     });
     esri.map.add(muk_watershed);
     // let muk_watershedLayerView = '';
@@ -849,7 +343,7 @@ export default {
 
     const muk_srl = new FeatureLayer({
       url:
-        'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer/1',
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/1',
     });
     esri.map.add(muk_srl);
     let muk_srlLayerView = '';
@@ -860,7 +354,7 @@ export default {
 
     const muk_lakes = new FeatureLayer({
       url:
-        'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer/2',
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/2',
     });
     esri.map.add(muk_lakes);
     let muk_lakesLayerView = '';
@@ -871,7 +365,7 @@ export default {
 
     const muk_fens = new FeatureLayer({
       url:
-        'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer/3',
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/3',
     });
     esri.map.add(muk_fens);
     let muk_fensLayerView = '';
@@ -882,112 +376,935 @@ export default {
 
     const muk_streams = new FeatureLayer({
       url:
-        'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer/4',
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/4',
     });
     esri.map.add(muk_streams);
-    // let muk_streamsLayerView = '';
-    // esri.mapView.whenLayerView(muk_streams).then(function(layerView) {
-    //   muk_streamsLayerView = layerView;
-    // });
+
+    const all_results = new FeatureLayer({
+      url:
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/5',
+    });
 
     let _this = this;
 
-    // const sublayersWithVisibility = mapImage.sublayers.map((sublayer) => ({
-    //   ...sublayer,
-    //   visible: false,
-    // }));
-
-    // sublayersWithVisibility.then(() => {
-    //   console.log(sublayersWithVisibility);
-    // });
-
-    // let layerArray = [muk_lakes, muk_fens, muk_srl];
-    // let selectedFeatures = [];
-    // let queryTitle = '';
-    // let layerTitle = '';
-    // let mq = _this.mapQuery;
-    // let msURL = '';
-
-    esri.mapView.on('click', function() {
-      // mq.forEach((quer) => {
-      //   mapImage.sublayers.forEach((sub) => {
-      //     layerTitle = sub.title;
-      //     queryTitle = quer;
-      //     let layID = sub.id;
-      //     // let sublayer = mapImage.sublayers.getItemAt(layID);
-      //     sub.visible = false;
-      //     if (queryTitle === layerTitle) {
-      //       // esri.map.add(sublayer);
-      //       console.log(layID);
-      //       console.log(queryTitle);
-      //       console.log(layerTitle);
-      //       // msURL =
-      //       //   'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/mukwonago_groundwater_data/MapServer/' +
-      //       //   layID;
-      //       // console.log(msURL);
-      //       if (_this.addRaster === true) {
-      //         sub.visible = true;
-      //       } else {
-      //         sub.visible = false;
-      //       }
-      //     }
-      //   });
-      // });
-      // const queriedLayer = new ImageryTileLayer({
-      //   url: msURL,
-      //   opacity: 0.7,
-      // });
-      // esri.map.add(queriedLayer);
+    esri.mapImage = new MapImageLayer({
+      url:
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/',
+      sublayers: [
+        {
+          id: 8,
+          title: 'Muk R. at Bluff Rd - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 9,
+          title: 'Muk R. at Bluff Rd - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 10,
+          title: 'Muk R. at Bluff Rd - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 11,
+          title: 'Muk R. at Bluff Rd - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 12,
+          title: 'Muk Trib below Bluff Rd Fen - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 13,
+          title: 'Muk Trib below Bluff Rd Fen - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 14,
+          title: 'Muk Trib below Bluff Rd Fen - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 15,
+          title: 'Muk Trib below Bluff Rd Fen - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 16,
+          title: 'Muk R. below Bluff Rd Fen - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 17,
+          title: 'Muk R. below Bluff Rd Fen - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 18,
+          title: 'Muk R. below Bluff Rd Fen - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 19,
+          title: 'Muk R. below Bluff Rd Fen - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 20,
+          title: 'Muk R. at Lulu Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 21,
+          title: 'Muk R. at Lulu Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 22,
+          title: 'Muk R. at Lulu Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 23,
+          title: 'Muk R. at Lulu Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 24,
+          title: 'Muk R. at Eagle Spring Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 25,
+          title: 'Muk R. at Eagle Spring Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 26,
+          title: 'Muk R. at Eagle Spring Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 27,
+          title: 'Muk R. at Eagle Spring Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 28,
+          title: 'Jericho Ck at Co Rd NN - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 29,
+          title: 'Jericho Ck at Co Rd NN - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 30,
+          title: 'Jericho Ck at Co Rd NN - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 31,
+          title: 'Jericho Ck at Co Rd NN - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 32,
+          title: 'Jericho Ck at Co Rd LO - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 33,
+          title: 'Jericho Ck at Co Rd LO - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 34,
+          title: 'Jericho Ck at Co Rd LO - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 35,
+          title: 'Jericho Ck at Co Rd LO - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 36,
+          title: 'Muk R. below Eagle Spring Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 37,
+          title: 'Muk R. below Eagle Spring Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 38,
+          title: 'Muk R. below Eagle Spring Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 39,
+          title: 'Muk R. below Eagle Spring Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 40,
+          title: 'Muk R. at Rainbow Spring Rd - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 41,
+          title: 'Muk R. at Rainbow Spring Rd - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 42,
+          title: 'Muk R. at Rainbow Spring Rd - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 43,
+          title: 'Muk R. at Rainbow Spring Rd - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 44,
+          title: 'Muk Trib at Town Line Rd - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 45,
+          title: 'Muk Trib at Town Line Rd - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 46,
+          title: 'Muk Trib at Town Line Rd - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 47,
+          title: 'Muk Trib at Town Line Rd - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 48,
+          title: 'Muk Trib below Lake Beulah - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 49,
+          title: 'Muk Trib below Lake Beulah - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 50,
+          title: 'Muk Trib below Lake Beulah - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 51,
+          title: 'Muk Trib below Lake Beulah - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 52,
+          title: 'Muk Trib at Muk R. - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 53,
+          title: 'Muk Trib at Muk R. - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 54,
+          title: 'Muk Trib at Muk R. - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 55,
+          title: 'Muk Trib at Muk R. - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 56,
+          title: 'Muk R. below Beulah Rd - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 57,
+          title: 'Muk R. below Beulah Rd - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 58,
+          title: 'Muk R. below Beulah Rd - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 59,
+          title: 'Muk R. below Beulah Rd - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 60,
+          title: 'Muk R. at Lower Phantom Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 61,
+          title: 'Muk R. at Lower Phantom Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 62,
+          title: 'Muk R. at Lower Phantom Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 63,
+          title: 'Muk R. at Lower Phantom Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 64,
+          title: 'Muk R. below Lower Phantom Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 65,
+          title: 'Muk R. below Lower Phantom Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 66,
+          title: 'Muk R. below Lower Phantom Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 67,
+          title: 'Muk R. below Lower Phantom Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 68,
+          title: 'Muk R. below Holz Pkwy - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 69,
+          title: 'Muk R. below Holz Pkwy - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 70,
+          title: 'Muk R. below Holz Pkwy - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 71,
+          title: 'Muk R. below Holz Pkwy - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 72,
+          title: 'Muk Trib below I43 - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 73,
+          title: 'Muk Trib below I43 - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 74,
+          title: 'Muk Trib below I43 - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 75,
+          title: 'Muk Trib below I43 - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 76,
+          title: 'Muk R. at Fox R. - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 77,
+          title: 'Muk R. at Fox R. - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 78,
+          title: 'Muk R. at Fox R. - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 79,
+          title: 'Muk R. at Fox R. - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 80,
+          title: 'Rainbow Springs Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 81,
+          title: 'Rainbow Springs Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 82,
+          title: 'Rainbow Springs Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 83,
+          title: 'Rainbow Springs Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 84,
+          title: 'Pickerel Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 85,
+          title: 'Pickerel Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 86,
+          title: 'Pickerel Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 87,
+          title: 'Pickerel Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 88,
+          title: 'Lulu Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 89,
+          title: 'Lulu Lake - Depletion - 700 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 90,
+          title: 'Lulu Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 91,
+          title: 'Lulu Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 92,
+          title: 'Lulu Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 93,
+          title: 'Eagle Spring Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 94,
+          title: 'Eagle Spring Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 95,
+          title: 'Eagle Spring Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 96,
+          title: 'Eagle Spring Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 97,
+          title: 'Phantom Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 98,
+          title: 'Phantom Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 99,
+          title: 'Phantom Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 100,
+          title: 'Phantom Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 101,
+          title: 'Lake Beulah/Army Lake - Depletion - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 102,
+          title: 'Lake Beulah/Army Lake - Depletion - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 103,
+          title: 'Lake Beulah/Army Lake - Depletion - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 104,
+          title: 'Lake Beulah/Army Lake - Depletion - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 105,
+          title: 'Pickerel Lake Fen - Drawdown - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 106,
+          title: 'Pickerel Lake Fen - Drawdown - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 107,
+          title: 'Pickerel Lake Fen - Drawdown - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 108,
+          title: 'Pickerel Lake Fen - Drawdown - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 109,
+          title: 'Bluff Road Fen - Drawdown - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 110,
+          title: 'Bluff Road Fen - Drawdown - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 111,
+          title: 'Bluff Road Fen - Drawdown - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 112,
+          title: 'Bluff Road Fen - Drawdown - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 113,
+          title: 'Lulu Lake Fen - Drawdown - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 114,
+          title: 'Lulu Lake Fen - Drawdown - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 115,
+          title: 'Lulu Lake Fen - Drawdown - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 116,
+          title: 'Lulu Lake Fen - Drawdown - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 117,
+          title: 'Lakewood Fen - Drawdown - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 118,
+          title: 'Lakewood Fen - Drawdown - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 119,
+          title: 'Lakewood Fen - Drawdown - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 120,
+          title: 'Lakewood Fen - Drawdown - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 121,
+          title: 'Meyer Sedge Fen - Drawdown - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 122,
+          title: 'Meyer Sedge Fen - Drawdown - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 123,
+          title: 'Meyer Sedge Fen - Drawdown - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 124,
+          title: 'Meyer Sedge Fen - Drawdown - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 125,
+          title: 'Jericho Creek Fen - Drawdown - 75 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 126,
+          title: 'Jericho Creek Fen - Drawdown - 50 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 127,
+          title: 'Jericho Creek Fen - Drawdown - 25 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+        {
+          id: 128,
+          title: 'Jericho Creek Fen - Drawdown - 100 gpm',
+          visible: false,
+          opacity: 0.7,
+        },
+      ],
     });
 
-    // const mapImage = new MapImageLayer({
-    //   url:
-    //     'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer',
-    //   sublayers: [
-    //     {
-    //       id: 0,
-    //     },
-    //     {
-    //       id: 1,
-    //     },
-    //     {
-    //       id: 2,
-    //     },
-    //     {
-    //       id: 3,
-    //     },
-    //     {
-    //       id: 4,
-    //     },
-    //   ],
+    esri.map.add(esri.mapImage);
+
+    let highlight;
+
+    esri.mapView.on('click', function(response) {
+      if (_this.planType === 'evaluate') {
+        _this.circleFeatures = [];
+        _this.resultsFeatures = [];
+
+        let markerSymbol = new SimpleMarkerSymbol({
+          style: 'circle',
+          color: [255, 0, 0],
+          size: 10,
+        });
+
+        let point = new Point({
+          x: response.mapPoint.longitude,
+          y: response.mapPoint.latitude,
+          symbol: markerSymbol,
+        });
+
+        let pointGraphic = new Graphic({
+          geometry: point,
+          symbol: markerSymbol,
+        });
+
+        _this.pointCoord =
+          response.mapPoint.longitude.toFixed(6) +
+          ', ' +
+          response.mapPoint.latitude.toFixed(6);
+
+        let circle = new Circle({
+          center: point,
+          geodesic: true,
+          radius: 2,
+          radiusUnit: 'miles',
+        });
+
+        let circleGraphic = new Graphic({
+          geometry: circle,
+          symbol: {
+            type: 'simple-fill',
+            color: null,
+            outline: {
+              type: 'simple-line',
+              color: [255, 0, 0],
+              width: 2,
+              style: 'short-dash',
+            },
+          },
+        });
+
+        const query = muk_srl.createQuery(circle);
+        const queryb = muk_lakes.createQuery(circle);
+        const queryc = muk_fens.createQuery(circle);
+        const queryd = all_results.createQuery(point);
+
+        query.geometry = circle;
+        queryb.geometry = circle;
+        queryc.geometry = circle;
+        queryd.geometry = point;
+
+        if (highlight) {
+          highlight.remove();
+        }
+
+        muk_srl.queryFeatures(query).then(function(result) {
+          result.features.forEach((feat) => {
+            _this.circleFeatures.push(feat.attributes);
+          });
+        });
+
+        muk_lakes.queryFeatures(queryb).then(function(result) {
+          result.features.forEach((feat) => {
+            _this.circleFeatures.push(feat.attributes);
+          });
+        });
+
+        muk_fens.queryFeatures(queryc).then(function(result) {
+          result.features.forEach((feat) => {
+            _this.circleFeatures.push(feat.attributes);
+          });
+        });
+
+        all_results.queryFeatures(queryd).then(function(result) {
+          result.features.forEach((feat) => {
+            _this.resultsFeatures.push(feat.attributes);
+          });
+        });
+
+        console.log(_this.circleFeatures);
+        console.log(_this.resultsFeatures);
+
+        esri.mapView.graphics.removeAll();
+        esri.mapView.graphics.add(circleGraphic, pointGraphic);
+
+        _this.evalCircle = true;
+
+        console.log(_this.evalCircle);
+        console.log(response);
+
+        // Grab coordinates (pointCoord) and place them in location or address search input if click. if search, add circle at location.
+      }
+    });
+
+    // let highlight;
+
+    // _this.$watch('evalCircle', () => {
+    //   console.log('evalCircle watcher initiated');
+    //   if (_this.evalCircle === true) {
+    //     // let layerArray = [muk_srl, muk_fens, muk_lakes];
+    //     esri.mapView.on('pointer-move', (event) => {
+    //       const opts = {
+    //         include: muk_srl,
+    //         muk_fens,
+    //         muk_lakes,
+    //       };
+    //       esri.mapView.hitTest(event, opts).then((e) => {
+    //         if (e.results.length) {
+    //           console.log('we have results from the hittest');
+    //           const hitGraphic = e.results[0].graphic;
+    //           console.log(e.results);
+    //           console.log(hitGraphic);
+
+    //           const query = muk_lakes.createQuery();
+    //           const queryb = muk_srl.createQuery();
+    //           const queryc = muk_fens.createQuery();
+
+    //           let objectID = hitGraphic.attributes.OBJECTID;
+    //           query.where = 'OBJECTID = ' + objectID;
+    //           queryb.where = 'OBJECTID = ' + objectID;
+    //           queryc.where = 'OBJECTID = ' + objectID;
+
+    //           if (highlight) {
+    //             highlight.remove();
+    //           }
+    //           muk_lakes.queryFeatures(query).then((result) => {
+    //             const feature = result.features[0];
+    //             highlight = muk_lakesLayerView.highlight(
+    //               feature.attributes['OBJECTID']
+    //             );
+    //           });
+    //           muk_srl.queryFeatures(queryb).then((result) => {
+    //             const feature = result.features[0];
+    //             highlight = muk_srlLayerView.highlight(
+    //               feature.attributes['OBJECTID']
+    //             );
+    //           });
+    //           muk_fens.queryFeatures(queryc).then((result) => {
+    //             const feature = result.features[0];
+    //             highlight = muk_fensLayerView.highlight(
+    //               feature.attributes['OBJECTID']
+    //             );
+    //           });
+    //         }
+    //       });
+    //     });
+    //   }
     // });
-    // esri.map.add(mapImage);
 
     //code to add highlight feature for map image layer
-    esri.mapView.popup.watch('selectedFeature', function(gra) {
-      if (gra) {
-        esri.mapView.graphics.removeAll();
-        var h = esri.mapView.highlightOptions;
-        gra.symbol = {
-          type: 'simple-fill', // autocasts as new SimpleFillSymbol()
-          color: [h.color.r, h.color.g, h.color.b, 0],
-          outline: {
-            // autocasts as new SimpleLineSymbol()
-            color: [h.color.r, h.color.g, h.color.b, h.color.a],
-            width: 1,
-          },
-        };
-        esri.mapView.graphics.add(gra);
-      } else {
-        esri.mapView.graphics.removeAll();
-      }
-    });
+    // esri.mapView.popup.watch('selectedFeature', function(gra) {
+    //   if (gra) {
+    //     esri.mapView.graphics.removeAll();
+    //     var h = esri.mapView.highlightOptions;
+    //     gra.symbol = {
+    //       type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+    //       color: [h.color.r, h.color.g, h.color.b, 0],
+    //       outline: {
+    //         // autocasts as new SimpleLineSymbol()
+    //         color: [h.color.r, h.color.g, h.color.b, h.color.a],
+    //         width: 1,
+    //       },
+    //     };
+    //     esri.mapView.graphics.add(gra);
+    //   } else {
+    //     esri.mapView.graphics.removeAll();
+    //   }
+    // });
 
-    esri.mapView.popup.watch('visible', function(vis) {
-      if (!vis) {
-        esri.mapView.graphics.removeAll();
-      }
-    });
+    // esri.mapView.popup.watch('visible', function(vis) {
+    //   if (!vis) {
+    //     esri.mapView.graphics.removeAll();
+    //   }
+    // });
 
     //add supporting layers widget to map if true
     // if (this.$store.state.config.supportingLayersOnMap) {

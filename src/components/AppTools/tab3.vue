@@ -48,12 +48,13 @@
       <div class="q-pa-md">
         <q-btn-group spread>
           <q-btn
-            color="primary"
+            :color="planType === 'evaluate' ? 'primary' : 'grey'"
             label="Evaluate a Planned Pumping Site"
             to="/tab3/evaluate"
+            @click="planType = 'evaluate'"
           />
           <q-btn
-            color="primary"
+            :color="planType === 'search' ? 'primary' : 'grey'"
             label="Search for a Pumping Site"
             to="/tab3/search"
             @click="planType = 'search'"
