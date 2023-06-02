@@ -77,32 +77,56 @@ export default {
       active: true,
       locationValue: '',
       upstreamFeatures: [
-        { st: 'sfr_1', qt: 'Muk R. at Fox R.' },
-        { st: 'sfr_2', qt: 'Muk Trib below I43' },
-        { st: 'sfr_3', qt: 'Muk R. below Holz Pkwy' },
-        { st: 'sfr_4', qt: 'Muk R. below Lower Phantom Lake' },
-        { st: 'sfr_5', qt: 'Muk R. at Lower Phantom Lake' },
-        { st: 'sfr_6', qt: 'Muk R. below Beulah Rd' },
-        { st: 'sfr_7', qt: 'Muk Trib at Muk R.' },
-        { st: 'sfr_8', qt: 'Muk Trib below Lake Beulah' },
-        { st: 'sfr_9', qt: 'Muk Trib at Town Line Rd' },
-        { st: 'sfr_10', qt: 'Muk R. at Rainbow Spring Rd' },
-        { st: 'sfr_11', qt: 'Muk R. below Eagle Spring Lake' },
-        { st: 'sfr_12', qt: 'Jericho Ck at Co Rd LO' },
-        { st: 'sfr_13', qt: 'Jericho Ck at Co Rd NN' },
-        { st: 'sfr_14', qt: 'Muk R. at Eagle Spring Lake' },
-        { st: 'sfr_15', qt: 'Muk R. at Lulu Lake' },
-        { st: 'sfr_16', qt: 'Muk R. below Bluff Rd Fen' },
-        { st: 'sfr_17', qt: 'Muk Trib below Bluff Rd Fen' },
-        { st: 'sfr_18', qt: 'Muk R. at Bluff Rd' },
-        { st: 'lk1', qt: 'Lake Beulah/Army Lake' },
-        { st: 'lk2', qt: 'Phantom Lake' },
-        { st: 'lk3', qt: 'Eagle Spring Lake' },
-        { st: 'lk4', qt: 'Lulu Lake' },
-        { st: 'lk5', qt: 'Pickerel Lake' },
-        { st: 'lk6', qt: 'Rainbow Springs Lake' },
-        { st: 'lk7', qt: '' },
-        { st: 'lk8', qt: '' },
+        {
+          st: 'sfr_1',
+          qt: 'Muk R. at Fox R.',
+          lk: ['lk1', 'lk2', 'lk3', 'lk4', 'lk5', 'lk6', 'lk7', 'lk8'],
+        },
+        { st: 'sfr_2', qt: 'Muk Trib below I43', lk: [] },
+        {
+          st: 'sfr_3',
+          qt: 'Muk R. below Holz Pkwy',
+          lk: ['lk1', 'lk2', 'lk3', 'lk4', 'lk5', 'lk6', 'lk7', 'lk8'],
+        },
+        {
+          st: 'sfr_4',
+          qt: 'Muk R. below Lower Phantom Lake',
+          lk: ['lk1', 'lk2', 'lk3', 'lk4', 'lk5', 'lk6', 'lk7', 'lk8'],
+        },
+        {
+          st: 'sfr_5',
+          qt: 'Muk R. at Lower Phantom Lake',
+          lk: ['lk1', 'lk3', 'lk4', 'lk5', 'lk6', 'lk7', 'lk8'],
+        },
+        {
+          st: 'sfr_6',
+          qt: 'Muk R. below Beulah Rd',
+          lk: ['lk3', 'lk4', 'lk6', 'lk7', 'lk8'],
+        },
+        { st: 'sfr_7', qt: 'Muk Trib at Muk R.', lk: ['lk1', 'lk5'] },
+        { st: 'sfr_8', qt: 'Muk Trib below Lake Beulah', lk: ['lk1', 'lk5'] },
+        { st: 'sfr_9', qt: 'Muk Trib at Town Line Rd', lk: ['lk5'] },
+        {
+          st: 'sfr_10',
+          qt: 'Muk R. at Rainbow Spring Rd',
+          lk: ['lk3', 'lk4', 'lk6', 'lk7', 'lk8'],
+        },
+        {
+          st: 'sfr_11',
+          qt: 'Muk R. below Eagle Spring Lake',
+          lk: ['lk3', 'lk4', 'lk7', 'lk8'],
+        },
+        { st: 'sfr_12', qt: 'Jericho Ck at Co Rd LO', lk: [] },
+        { st: 'sfr_13', qt: 'Jericho Ck at Co Rd NN', lk: [] },
+        {
+          st: 'sfr_14',
+          qt: 'Muk R. at Eagle Spring Lake',
+          lk: ['lk4', 'lk7', 'lk8'],
+        },
+        { st: 'sfr_15', qt: 'Muk R. at Lulu Lake', lk: ['lk7', 'lk8'] },
+        { st: 'sfr_16', qt: 'Muk R. below Bluff Rd Fen', lk: ['lk7', 'lk8'] },
+        { st: 'sfr_17', qt: 'Muk Trib below Bluff Rd Fen', lk: ['lk7'] },
+        { st: 'sfr_18', qt: 'Muk R. at Bluff Rd', lk: ['lk7'] },
       ],
     };
   },
@@ -177,26 +201,67 @@ export default {
       const srf_lakes = new FeatureLayer({
         url:
           'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/6',
+        outFields: ['*'],
+      });
+      esri.map.add(srf_lakes);
+      let srf_lakesLayerView = '';
+      esri.mapView.whenLayerView(srf_lakes).then(function(layerView) {
+        srf_lakesLayerView = layerView;
       });
 
       const srf_streams = new FeatureLayer({
         url:
           'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/7',
+        outFields: ['*'],
+      });
+      esri.map.add(srf_streams);
+      let srf_streamsLayerView = '';
+      esri.mapView.whenLayerView(srf_streams).then(function(layerView) {
+        srf_streamsLayerView = layerView;
       });
 
-      const queryLakes = srf_lakes.createQuery();
-      const queryStreams = srf_streams.createQuery();
-      let upstreamLayer = [];
+      let highlight;
 
-      srf_lakes.queryFeatures(queryLakes).then(function(result) {
-        upstreamLayer.push(result.features);
+      this.upstreamFeatures.forEach((feat) => {
+        if (this.mapQuery.startsWith(feat.qt)) {
+          console.log(feat);
+          let lake;
+          let srl;
+          if (feat.lk != []) {
+            feat.lk.forEach((a) => {
+              lake = "'" + a + "'";
+              const queryLakes = srf_lakes.createQuery();
+              queryLakes.where = 'lake_name = ' + lake;
+
+              srf_lakes.queryFeatures(queryLakes).then(function(result) {
+                let feature = result.features[0];
+                console.log(feature.attributes.lake_name);
+                highlight?.remove();
+                highlight = srf_lakesLayerView.highlight(
+                  feature.attributes['OBJECTID']
+                );
+              });
+            });
+          }
+          if (feat.st) {
+            srl = "'" + feat.st + "'";
+            const queryStreams = srf_streams.createQuery();
+            queryStreams.where = 'sfr_name =' + srl;
+            console.log(queryStreams.where);
+
+            srf_streams.queryFeatures(queryStreams).then(function(result) {
+              let feature = result.features[0];
+              console.log(result);
+              console.log(feature);
+              highlight?.remove();
+              highlight = srf_streamsLayerView.highlight(
+                feature.attributes['OBJECTID']
+              );
+              console.log('streams highlighted');
+            });
+          }
+        }
       });
-
-      srf_streams.queryFeatures(queryStreams).then(function(result) {
-        upstreamLayer.push(result.features);
-      });
-
-      console.log(upstreamLayer);
 
       if (this.addRaster === true) {
         console.log(this.mapQuery);
@@ -220,28 +285,14 @@ export default {
           console.log(sub.visible);
           sub.visible = false;
         });
+        esri.map.remove(
+          srf_streams,
+          srf_lakes,
+          srf_lakesLayerView,
+          srf_streamsLayerView
+        );
       }
     },
-    // evalCircle() {
-    //   if (this.evalCircle === true) {
-    //     esri.mapView.on('pointer-move', (response) => {
-    //       const opts = {
-    //         include: muk_srlLayerView,
-    //         muk_fensLayerView,
-    //         muk_lakesLayerView,
-    //       };
-    //       esri.mapView.hitTest(response, opts).then((e) => {
-    //         if (e.results.length) {
-    //           const hitGraphic = e.results[0].graphic;
-    //           console.log(hitGraphic);
-    //           // opts.forEach((layer) => {
-    //           //   layer.highlight()
-    //           // })
-    //         }
-    //       });
-    //     });
-    //   }
-    // },
   },
 
   mounted() {
@@ -336,10 +387,6 @@ export default {
         'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/0',
     });
     esri.map.add(muk_watershed);
-    // let muk_watershedLayerView = '';
-    // esri.mapView.whenLayerView(muk_watershed).then(function(layerView) {
-    //   muk_watershedLayerView = layerView;
-    // });
 
     const muk_srl = new FeatureLayer({
       url:
@@ -1220,8 +1267,6 @@ export default {
 
         console.log(_this.evalCircle);
         console.log(response);
-
-        // Grab coordinates (pointCoord) and place them in location or address search input if click. if search, add circle at location.
       }
     });
 

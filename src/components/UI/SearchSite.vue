@@ -214,7 +214,7 @@ export default {
           btn: false,
         },
         { label: 'Muk R. below Holz Pkwy', display: false, btn: false },
-        { label: 'Muk Trub below I43', display: false, btn: false },
+        { label: 'Muk Trib below I43', display: false, btn: false },
         { label: 'Muk R. at Fox R.', display: false, btn: false },
         { label: 'Rainbow Springs Lake', display: false, btn: false },
         { label: 'Pickerel Lake', display: false, btn: false },
@@ -262,11 +262,11 @@ export default {
   },
   methods: {
     removeSelected(val) {
+      this.mapQuery = '';
       const index = this.featureSelect.indexOf(val);
       if (index !== -1) {
         this.featureSelect.splice(index, 1);
-        this.mapQuery = '';
-        this.addRaster = false;
+        this.$store.commit('updateAddRaster', false);
         val.display = false;
         val.btn = false;
       }
@@ -294,7 +294,7 @@ export default {
       val.btn = false;
       val.display = false;
       this.mapQuery = '';
-      this.addRaster = false;
+      this.$store.commit('updateAddRaster', false);
 
       console.log(val.btn);
       console.log(val.display);
@@ -305,7 +305,7 @@ export default {
   watch: {
     featureSelect() {
       if (this.addRaster === true) {
-        this.addRaster = false;
+        this.addRaster.set(false);
         this.mapQuery = '';
       }
     },
