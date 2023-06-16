@@ -31,7 +31,7 @@ export default {
       let size = '';
       let padding = '';
       let tooltip = '';
-      let style = 'height: 20px; width: 20px;';
+      let style = 'height: 30px; width: 30px;';
       let color = '';
       // info icon
       if (this.type === 'info') {

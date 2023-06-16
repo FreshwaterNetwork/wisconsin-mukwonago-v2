@@ -62,6 +62,7 @@ export default createStore({
     evalCircle: false,
     circleFeatures: [],
     resultsFeatures: [],
+    featCounter: 0,
   },
   mutations: {
     //data retrieved from web services
@@ -126,6 +127,9 @@ export default createStore({
     },
     updateResultsFeatures(state, val) {
       state.resultsFeatures = val;
+    },
+    updateFeatCounter(state, val) {
+      state.featCounter = val;
     },
   },
 

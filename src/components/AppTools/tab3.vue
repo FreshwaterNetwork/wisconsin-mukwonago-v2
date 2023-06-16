@@ -48,14 +48,16 @@
       <div class="q-pa-md">
         <q-btn-group spread>
           <q-btn
-            :color="planType === 'evaluate' ? 'primary' : 'grey'"
+            :color="planType === 'evaluate' ? 'primary' : 'white'"
             label="Evaluate a Planned Pumping Site"
+            :text-color="planType === 'evaluate' ? 'white' : 'black'"
             to="/tab3/evaluate"
             @click="planType = 'evaluate'"
           />
           <q-btn
-            :color="planType === 'search' ? 'primary' : 'grey'"
+            :color="planType === 'search' ? 'primary' : 'white'"
             label="Search for a Pumping Site"
+            :text-color="planType === 'search' ? 'white' : 'black'"
             to="/tab3/search"
             @click="planType = 'search'"
           />
@@ -78,6 +80,9 @@ export default {
         this.$store.commit('updatePlanType', value);
       },
     },
+    addRaster() {
+      return this.$store.state.addRaster;
+    },
     agreed: {
       get() {
         return this.$store.state.agreed;
@@ -85,6 +90,13 @@ export default {
       set(value) {
         this.$store.commit('updateAgreed', value);
       },
+    },
+  },
+  watch: {
+    planType() {
+      if (this.planType === '') {
+        this.addRaster = false;
+      }
     },
   },
 };

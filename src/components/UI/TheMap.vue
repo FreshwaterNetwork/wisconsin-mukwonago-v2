@@ -128,6 +128,7 @@ export default {
         { st: 'sfr_17', qt: 'Muk Trib below Bluff Rd Fen', lk: ['lk7'] },
         { st: 'sfr_18', qt: 'Muk R. at Bluff Rd', lk: ['lk7'] },
       ],
+      radios: [],
     };
   },
   computed: {
@@ -153,6 +154,9 @@ export default {
     },
     planType() {
       return this.$store.state.planType;
+    },
+    featCounter() {
+      return this.$store.state.featCounter;
     },
     pointCoord: {
       get() {
@@ -194,74 +198,9 @@ export default {
     supportingVisibleLayerOpacity() {
       this.updateSupportingOpacity();
     },
-    addRaster() {
+    mapQuery() {
       let queryTitle = '';
       let layerTitle = '';
-
-      const srf_lakes = new FeatureLayer({
-        url:
-          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/6',
-        outFields: ['*'],
-      });
-      esri.map.add(srf_lakes);
-      let srf_lakesLayerView = '';
-      esri.mapView.whenLayerView(srf_lakes).then(function(layerView) {
-        srf_lakesLayerView = layerView;
-      });
-
-      const srf_streams = new FeatureLayer({
-        url:
-          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/7',
-        outFields: ['*'],
-      });
-      esri.map.add(srf_streams);
-      let srf_streamsLayerView = '';
-      esri.mapView.whenLayerView(srf_streams).then(function(layerView) {
-        srf_streamsLayerView = layerView;
-      });
-
-      let highlight;
-
-      this.upstreamFeatures.forEach((feat) => {
-        if (this.mapQuery.startsWith(feat.qt)) {
-          console.log(feat);
-          let lake;
-          let srl;
-          if (feat.lk != []) {
-            feat.lk.forEach((a) => {
-              lake = "'" + a + "'";
-              const queryLakes = srf_lakes.createQuery();
-              queryLakes.where = 'lake_name = ' + lake;
-
-              srf_lakes.queryFeatures(queryLakes).then(function(result) {
-                let feature = result.features[0];
-                console.log(feature.attributes.lake_name);
-                highlight?.remove();
-                highlight = srf_lakesLayerView.highlight(
-                  feature.attributes['OBJECTID']
-                );
-              });
-            });
-          }
-          if (feat.st) {
-            srl = "'" + feat.st + "'";
-            const queryStreams = srf_streams.createQuery();
-            queryStreams.where = 'sfr_name =' + srl;
-            console.log(queryStreams.where);
-
-            srf_streams.queryFeatures(queryStreams).then(function(result) {
-              let feature = result.features[0];
-              console.log(result);
-              console.log(feature);
-              highlight?.remove();
-              highlight = srf_streamsLayerView.highlight(
-                feature.attributes['OBJECTID']
-              );
-              console.log('streams highlighted');
-            });
-          }
-        }
-      });
 
       if (this.addRaster === true) {
         console.log(this.mapQuery);
@@ -285,13 +224,10 @@ export default {
           console.log(sub.visible);
           sub.visible = false;
         });
-        esri.map.remove(
-          srf_streams,
-          srf_lakes,
-          srf_lakesLayerView,
-          srf_streamsLayerView
-        );
       }
+    },
+    planType() {
+      esri.mapView.graphics.removeAll();
     },
   },
 
@@ -307,13 +243,13 @@ export default {
     const tncDarkMapId = '1f48b2b2456c44ad9c58d6741378c2ba';
     const oceansMapId = '67ab7f7c535c4687b6518e6d2343e8a2';
     const hybridMapId = '86265e5a4bbb4187a59719cf134e0018';
-    console.log(tncDarkMapId, tncHillshadeMapId, hybridMapId);
+    console.log(tncDarkMapId, oceansMapId, hybridMapId);
 
     //select a basemap
     esri.map = new Map({
       basemap: {
         portalItem: {
-          id: oceansMapId,
+          id: tncHillshadeMapId,
         },
       },
       layers: [esri.layers],
@@ -323,7 +259,7 @@ export default {
     esri.mapView = new MapView({
       map: esri.map,
       center: [-88.47431, 42.879521],
-      zoom: 11,
+      zoom: 10,
       container: this.$el,
       highlightOptions: {
         color: 'yellow',
@@ -1169,7 +1105,98 @@ export default {
 
     esri.map.add(esri.mapImage);
 
-    let highlight;
+    let highlightLake = '';
+    let highlightStream = '';
+
+    const srf_lakes = new FeatureLayer({
+      url:
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/6',
+      outFields: ['*'],
+    });
+
+    const srf_streams = new FeatureLayer({
+      url:
+        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/7',
+      outFields: ['*'],
+    });
+
+    _this.$watch('mapQuery', () => {
+      if (highlightStream) {
+        highlightStream.remove();
+      }
+      if (highlightLake) {
+        highlightLake.remove();
+      }
+      if (_this.addRaster === true) {
+        esri.map.add(srf_lakes);
+        let srf_lakesLayerView;
+        esri.mapView.whenLayerView(srf_lakes).then(function(layerView) {
+          srf_lakesLayerView = layerView;
+        });
+
+        esri.map.add(srf_streams);
+        let srf_streamsLayerView;
+        esri.mapView.whenLayerView(srf_streams).then(function(layerView) {
+          srf_streamsLayerView = layerView;
+        });
+
+        this.upstreamFeatures.forEach((feat) => {
+          if (this.mapQuery != '') {
+            if (this.mapQuery.startsWith(feat.qt)) {
+              console.log(feat);
+              let lake;
+              let srl;
+              if (feat.lk != []) {
+                feat.lk.forEach((a) => {
+                  lake = "'" + a + "'";
+                  const queryLakes = srf_lakes.createQuery();
+                  queryLakes.where = 'lake_name = ' + lake;
+
+                  srf_lakes.queryFeatures(queryLakes).then(function(result) {
+                    let feature = result.features[0];
+                    console.log(feature.attributes.lake_name);
+                    if (highlightLake) {
+                      highlightLake.remove();
+                      highlightLake = null;
+                    }
+                    highlightLake = srf_lakesLayerView.highlight(
+                      feature.attributes['OBJECTID']
+                    );
+                  });
+                });
+              }
+              if (feat.st) {
+                srl = "'" + feat.st + "'";
+                const queryStreams = srf_streams.createQuery();
+                queryStreams.where = 'sfr_name =' + srl;
+                console.log(queryStreams.where);
+
+                srf_streams.queryFeatures(queryStreams).then(function(result) {
+                  let feature = result.features[0];
+                  if (highlightStream) {
+                    highlightStream.remove();
+                    highlightStream = null;
+                  }
+                  highlightStream = srf_streamsLayerView.highlight(
+                    feature.attributes['OBJECTID']
+                  );
+                  console.log('streams highlighted');
+                });
+              }
+            }
+          }
+        });
+      } else {
+        if (highlightLake) {
+          highlightLake.remove();
+        }
+        if (highlightStream) {
+          highlightStream.remove();
+        }
+        esri.map.remove(srf_lakes);
+        esri.map.remove(srf_streams);
+      }
+    });
 
     esri.mapView.on('click', function(response) {
       if (_this.planType === 'evaluate') {
@@ -1178,8 +1205,12 @@ export default {
 
         let markerSymbol = new SimpleMarkerSymbol({
           style: 'circle',
-          color: [255, 0, 0],
-          size: 10,
+          color: [125, 125, 125],
+          size: 5,
+          outline: {
+            color: [225, 0, 0],
+            width: 1,
+          },
         });
 
         let point = new Point({
@@ -1212,7 +1243,7 @@ export default {
             color: null,
             outline: {
               type: 'simple-line',
-              color: [255, 0, 0],
+              color: [125, 125, 125],
               width: 2,
               style: 'short-dash',
             },
@@ -1228,10 +1259,6 @@ export default {
         queryb.geometry = circle;
         queryc.geometry = circle;
         queryd.geometry = point;
-
-        if (highlight) {
-          highlight.remove();
-        }
 
         muk_srl.queryFeatures(query).then(function(result) {
           result.features.forEach((feat) => {
@@ -1261,12 +1288,109 @@ export default {
         console.log(_this.resultsFeatures);
 
         esri.mapView.graphics.removeAll();
-        esri.mapView.graphics.add(circleGraphic, pointGraphic);
+        esri.mapView.graphics.add(circleGraphic);
+        esri.mapView.graphics.add(pointGraphic);
 
         _this.evalCircle = true;
+      }
+    });
 
-        console.log(_this.evalCircle);
-        console.log(response);
+    _this.$watch('featCounter', () => {
+      const rad = document.getElementsByClassName('q-radio');
+
+      console.log(rad);
+
+      for (let i = 0; i < rad.length; i++) {
+        _this.radios.push(rad[i].ariaLabel);
+      }
+
+      let i;
+      let q;
+
+      _this.radios.forEach((r) => {
+        i = r.split(' -');
+        q = i[0];
+      });
+
+      for (let i = 0; i < rad.length; i++) {
+        rad[i].addEventListener('mouseover', function() {
+          console.log('I am hovering');
+
+          if (_this.planType === 'search') {
+            let highlightLakes = '';
+            let highlightSrl = '';
+            let highlightFens = '';
+
+            const querya = muk_srl.createQuery();
+            querya.where = 'CommonName = ' + "'" + q + "'";
+
+            const queryb = muk_lakes.createQuery();
+            queryb.where = 'CommonName = ' + "'" + q + "'";
+
+            const queryc = muk_fens.createQuery();
+            queryc.where = 'CommonName = ' + "'" + q + "'";
+
+            muk_srl.queryFeatures(querya).then(function(result) {
+              let feature = result.features[0];
+
+              if (feature) {
+                if (highlightSrl) {
+                  console.log('removing highlight');
+                  highlightSrl.remove();
+                  highlightSrl = null;
+                } else {
+                  highlightSrl = muk_srlLayerView.highlight(
+                    feature.attributes['OBJECTID']
+                  );
+                  // esri.mapView.popup.open({
+                  //   title: feature.attributes.CommonName,
+                  //   location: {
+                  //     latitude: feature.geometry.latitude,
+                  //     longitude: feature.geometry.longitude,
+                  //   },
+                  //   visible: true,
+                  //   highlightEnabled: true,
+                  // });
+                  // setTimeout(function() {
+                  //   esri.mapView.popup.visible = false;
+                  //   esri.mapView.popup.highlightEnabled = false;
+                  // }, 2000);
+                  // }
+                }
+              }
+            });
+
+            muk_lakes.queryFeatures(queryb).then(function(result) {
+              let feature = result.features[0];
+
+              if (feature) {
+                if (highlightLakes) {
+                  highlightLakes.remove();
+                  highlightLakes = null;
+                } else {
+                  highlightLakes = muk_lakesLayerView.highlight(
+                    feature.attributes['OBJECTID']
+                  );
+                }
+              }
+            });
+
+            muk_fens.queryFeatures(queryc).then(function(result) {
+              let feature = result.features[0];
+
+              if (feature) {
+                if (highlightFens) {
+                  highlightFens.remove();
+                  highlightFens = null;
+                } else {
+                  highlightFens = muk_fensLayerView.highlight(
+                    feature.attributes['OBJECTID']
+                  );
+                }
+              }
+            });
+          }
+        });
       }
     });
 
@@ -1382,8 +1506,13 @@ export default {
 
     _this.$watch('newLocationValue', (newVal, locationValue) => {
       if (newVal !== locationValue) {
-        searchWidg.search(newVal);
+        searchWidg
+          .search(newVal)
+          .then((result) => console.log(result.mapPoint));
       }
+      console.log(newVal);
+      console.log(locationValue);
+      console.log(searchWidg.search());
     });
 
     // add measure tools
