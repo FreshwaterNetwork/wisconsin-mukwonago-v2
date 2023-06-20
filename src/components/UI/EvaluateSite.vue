@@ -11,7 +11,6 @@
       <q-input
         outlined
         v-model="locationValue"
-        clearable
         for="locationID"
         label="Location or Address"
         style="display:block; margin:auto 5px auto auto;"
@@ -46,14 +45,14 @@
       style="width:200px; display:block; margin:auto auto 10px auto;"
       dense
     />
-    <p
+    <!-- <p
       v-if="!pumpRateValue || (locationValue == '' && this.pointCoord == '')"
       style="color: red;"
       class="text-center q-my-sm"
     >
       A pump rate and location <strong>must</strong> be selected to display
       data.
-    </p>
+    </p> -->
     <!-- Data Table -->
     <!-- <q-markup-table>
         <thead>
@@ -312,13 +311,36 @@ export default {
     resultsFeatures() {
       return this.$store.state.resultsFeatures;
     },
+    nonCoordLoc: {
+      get() {
+        return this.$store.state.nonCoordLoc;
+      },
+      set(value) {
+        this.$store.commit('updateNonCoordLoc', value);
+      },
+    },
   },
   methods: {
     updateLocationValue(val) {
       let inputBox = document.getElementById('locationID').value;
       val = inputBox;
       this.$store.commit('updateLocationValue', val);
+      this.locationValue = val;
+      this.nonCoordLoc = true;
       console.log(val);
+      // if (this.locationValue != '') {
+      //   this.nonCoordLoc = true;
+      //   console.log('address entered');
+      //   console.log(this.nonCoordLoc);
+      // } else if (this.locationValue === '') {
+      //   this.nonCoordLoc = false;
+      //   console.log(this.nonCoordLoc);
+      //   let inputBox = document.getElementById('locationID').value;
+      //   val = inputBox;
+      //   // this.$store.commit('updateLocationValue', val);
+      //   this.locationValue = val;
+      //   console.log(val);
+      // }
     },
     createRows() {
       let featName;
@@ -396,6 +418,7 @@ export default {
     },
     locationValue() {
       this.pumpRateValue = '';
+      this.rows = [];
     },
   },
 };

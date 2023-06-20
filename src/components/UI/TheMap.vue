@@ -75,7 +75,6 @@ export default {
   data() {
     return {
       active: true,
-      locationValue: '',
       upstreamFeatures: [
         {
           st: 'sfr_1',
@@ -143,8 +142,16 @@ export default {
     selectedFeatures() {
       return this.$store.state.selectedFeatures;
     },
-    newLocationValue() {
-      return this.$store.state.locationValue;
+    // newLocationValue() {
+    //   return this.$store.state.locationValue;
+    // },
+    locationValue: {
+      get() {
+        return this.$store.state.locationValue;
+      },
+      set(value) {
+        this.$store.commit('updateLocationValue', value);
+      },
     },
     mapQuery() {
       return this.$store.state.mapQuery;
@@ -189,6 +196,9 @@ export default {
       set(value) {
         this.$store.commit('updateResultsFeatures', value);
       },
+    },
+    nonCoordLoc() {
+      return this.$store.state.nonCoordLoc;
     },
   },
   watch: {
@@ -1200,6 +1210,8 @@ export default {
 
     esri.mapView.on('click', function(response) {
       if (_this.planType === 'evaluate') {
+        // let point;
+
         _this.circleFeatures = [];
         _this.resultsFeatures = [];
 
@@ -1292,6 +1304,111 @@ export default {
         esri.mapView.graphics.add(pointGraphic);
 
         _this.evalCircle = true;
+      }
+    });
+
+    _this.$watch('locationValue', () => {
+      console.log(this.locationValue);
+
+      if (this.nonCoordLoc === true) {
+        searchWidg.search(this.locationValue).then((event) => {
+          this.searchResults = event.results;
+          let geom = this.searchResults[0].results[0].feature.geometry;
+
+          console.log(geom);
+
+          if (_this.planType === 'evaluate') {
+            // let point;
+
+            _this.circleFeatures = [];
+            _this.resultsFeatures = [];
+
+            let markerSymbol = new SimpleMarkerSymbol({
+              style: 'circle',
+              color: [125, 125, 125],
+              size: 5,
+              outline: {
+                color: [225, 0, 0],
+                width: 1,
+              },
+            });
+
+            let point = new Point({
+              x: geom.longitude,
+              y: geom.latitude,
+              symbol: markerSymbol,
+            });
+
+            let pointGraphic = new Graphic({
+              geometry: point,
+              symbol: markerSymbol,
+            });
+
+            let circle = new Circle({
+              center: point,
+              geodesic: true,
+              radius: 2,
+              radiusUnit: 'miles',
+            });
+
+            let circleGraphic = new Graphic({
+              geometry: circle,
+              symbol: {
+                type: 'simple-fill',
+                color: null,
+                outline: {
+                  type: 'simple-line',
+                  color: [125, 125, 125],
+                  width: 2,
+                  style: 'short-dash',
+                },
+              },
+            });
+
+            const query = muk_srl.createQuery(circle);
+            const queryb = muk_lakes.createQuery(circle);
+            const queryc = muk_fens.createQuery(circle);
+            const queryd = all_results.createQuery(point);
+
+            query.geometry = circle;
+            queryb.geometry = circle;
+            queryc.geometry = circle;
+            queryd.geometry = point;
+
+            muk_srl.queryFeatures(query).then(function(result) {
+              result.features.forEach((feat) => {
+                _this.circleFeatures.push(feat.attributes);
+              });
+            });
+
+            muk_lakes.queryFeatures(queryb).then(function(result) {
+              result.features.forEach((feat) => {
+                _this.circleFeatures.push(feat.attributes);
+              });
+            });
+
+            muk_fens.queryFeatures(queryc).then(function(result) {
+              result.features.forEach((feat) => {
+                _this.circleFeatures.push(feat.attributes);
+              });
+            });
+
+            all_results.queryFeatures(queryd).then(function(result) {
+              result.features.forEach((feat) => {
+                _this.resultsFeatures.push(feat.attributes);
+              });
+            });
+
+            console.log(_this.circleFeatures);
+            console.log(_this.resultsFeatures);
+
+            esri.mapView.graphics.removeAll();
+            esri.mapView.graphics.add(circleGraphic);
+            esri.mapView.graphics.add(pointGraphic);
+
+            _this.evalCircle = true;
+          }
+        });
       }
     });
 
@@ -1502,17 +1619,6 @@ export default {
     esri.mapView.ui.add(searchWidg, {
       position: 'top-right',
       index: 0,
-    });
-
-    _this.$watch('newLocationValue', (newVal, locationValue) => {
-      if (newVal !== locationValue) {
-        searchWidg
-          .search(newVal)
-          .then((result) => console.log(result.mapPoint));
-      }
-      console.log(newVal);
-      console.log(locationValue);
-      console.log(searchWidg.search());
     });
 
     // add measure tools

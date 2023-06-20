@@ -63,6 +63,7 @@ export default createStore({
     circleFeatures: [],
     resultsFeatures: [],
     featCounter: 0,
+    nonCoordLoc: false,
   },
   mutations: {
     //data retrieved from web services
@@ -130,6 +131,9 @@ export default createStore({
     },
     updateFeatCounter(state, val) {
       state.featCounter = val;
+    },
+    updateNonCoordLoc(state, val) {
+      state.nonCoordLoc = val;
     },
   },
 
