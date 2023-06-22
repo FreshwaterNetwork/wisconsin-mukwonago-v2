@@ -230,7 +230,12 @@
       </template>
     </q-table>
   </div>
-  <q-btn to="/tab3" color="primary" class="back-btn">
+  <q-btn
+    to="/tab3"
+    color="primary"
+    class="back-btn"
+    @click="this.planType = ''"
+  >
     Back
   </q-btn>
 </template>
@@ -328,19 +333,6 @@ export default {
       this.locationValue = val;
       this.nonCoordLoc = true;
       console.log(val);
-      // if (this.locationValue != '') {
-      //   this.nonCoordLoc = true;
-      //   console.log('address entered');
-      //   console.log(this.nonCoordLoc);
-      // } else if (this.locationValue === '') {
-      //   this.nonCoordLoc = false;
-      //   console.log(this.nonCoordLoc);
-      //   let inputBox = document.getElementById('locationID').value;
-      //   val = inputBox;
-      //   // this.$store.commit('updateLocationValue', val);
-      //   this.locationValue = val;
-      //   console.log(val);
-      // }
     },
     createRows() {
       let featName;
@@ -392,11 +384,6 @@ export default {
 
         this.rows.push(row);
       });
-
-      console.log(this.ddQuery);
-      console.log(this.depQuery);
-      console.log(this.dep);
-      console.log(this.dd);
     },
     getCellStyles(drawdown, depletion) {
       if (drawdown >= 5 || depletion >= 5) {

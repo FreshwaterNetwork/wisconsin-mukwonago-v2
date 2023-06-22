@@ -35,7 +35,7 @@
       </q-btn>
     </div>
     <div v-if="agreed">
-      <div v-if="!planType">
+      <div v-if="agreed === true && this.planType === ''">
         Groundwater dependent ecosystems (gde) are systems that depend on
         groundwater inputs to support their natural flora and fauna. These
         ecosystems can occur in wetlands, lakes and rivers. One rare gde is the
