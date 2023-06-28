@@ -12,11 +12,30 @@
       outlined
       :options="featureOptions"
       label="Select Feature(s)"
+      use-chips
     />
-    <p class="q-mt-md">
-      <b>What is the yearly average pumping rate for the well?</b>
-    </p>
-    <p class="text-caption">
+    <div style="display: flex;">
+      <p class="q-mt-md">
+        <b>What is the yearly average pumping rate for the well?</b>
+      </p>
+      <icon-button
+        v-if="showInfo === false"
+        type="info"
+        class="q-mt-sm"
+        method="show-info"
+        @show-info="showInfo = true"
+        style="margin-left:5px;"
+      />
+      <icon-button
+        v-if="showInfo === true"
+        type="close"
+        class="q-mt-sm"
+        method="hide-info"
+        @hide-info="showInfo = false"
+        style="margin-left:5px;"
+      />
+    </div>
+    <p v-if="showInfo === true">
       A typical home uses around 200 gallons per day or 0.14 gpm, so a
       subdivision of 50 homes uses around 7-10 gpm on average. An irrigation
       well uses between 400 and 1200 gpm for 10-50 percent of the time during
@@ -26,7 +45,6 @@
       rates into perspective, a garden hose turned on full blast has a flow of
       about 3 gpm.
     </p>
-
     <!-- Pump rate selector  -->
     <q-btn-toggle
       v-model="pumpRateValue"
@@ -280,7 +298,7 @@
           switch-toggle-side
           default-opened
           header-class="text-h6"
-          label="Stream Response Locations"
+          label="Streams"
         >
           <div v-for="(feat, index) in radioOptions" :key="index">
             <q-checkbox
@@ -377,7 +395,7 @@ export default {
       ],
       featureOptions: [
         {
-          label: 'Stream Response Locations',
+          label: 'Streams',
           disable: true,
         },
         {
@@ -507,7 +525,7 @@ export default {
           type: 'srl',
         },
         {
-          label: 'Lakes',
+          label: 'Lake',
           disable: true,
         },
         {
@@ -553,7 +571,7 @@ export default {
           type: 'lake',
         },
         {
-          label: 'Fens',
+          label: 'Fen',
           disable: true,
         },
         {
@@ -1339,6 +1357,7 @@ export default {
       selectedRadio: '',
       tempBool: false,
       radioFeature: [],
+      showInfo: false,
     };
   },
   computed: {
