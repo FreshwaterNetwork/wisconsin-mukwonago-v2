@@ -7,9 +7,9 @@
     <div class="user-agreement" v-if="agreed === false">
       <span>
         <strong>
-          <center>
+          <div class="text-center">
             Protecting Groundwater Dependent Ecosystems Intended Use Agreement
-          </center>
+          </div>
         </strong>
       </span>
       <br />
@@ -35,7 +35,7 @@
       </q-btn>
     </div>
     <div v-if="agreed">
-      <div v-if="!planType">
+      <div v-if="agreed === true && this.planType === ''">
         Groundwater dependent ecosystems (gde) are systems that depend on
         groundwater inputs to support their natural flora and fauna. These
         ecosystems can occur in wetlands, lakes and rivers. One rare gde is the
@@ -48,14 +48,16 @@
       <div class="q-pa-md">
         <q-btn-group spread>
           <q-btn
-            color="primary"
+            :color="planType === 'evaluate' ? 'primary' : 'white'"
             label="Evaluate a Planned Pumping Site"
+            :text-color="planType === 'evaluate' ? 'white' : 'black'"
             to="/tab3/evaluate"
             @click="planType = 'evaluate'"
           />
           <q-btn
-            color="primary"
+            :color="planType === 'search' ? 'primary' : 'white'"
             label="Search for a Pumping Site"
+            :text-color="planType === 'search' ? 'white' : 'black'"
             to="/tab3/search"
             @click="planType = 'search'"
           />
@@ -69,9 +71,6 @@
 <script>
 export default {
   name: 'tab3',
-  components: {},
-  data() {},
-  methods: {},
   computed: {
     planType: {
       get() {
@@ -81,6 +80,9 @@ export default {
         this.$store.commit('updatePlanType', value);
       },
     },
+    addRaster() {
+      return this.$store.state.addRaster;
+    },
     agreed: {
       get() {
         return this.$store.state.agreed;
@@ -88,6 +90,13 @@ export default {
       set(value) {
         this.$store.commit('updateAgreed', value);
       },
+    },
+  },
+  watch: {
+    planType() {
+      if (this.planType === '') {
+        this.addRaster = false;
+      }
     },
   },
 };

@@ -56,6 +56,14 @@ export default createStore({
     selectedFeatures: [],
     locationValue: '',
     removeHighlight: false,
+    mapQuery: '',
+    addRaster: false,
+    pointCoord: '',
+    evalCircle: false,
+    circleFeatures: [],
+    resultsFeatures: [],
+    featCounter: 0,
+    nonCoordLoc: false,
   },
   mutations: {
     //data retrieved from web services
@@ -102,6 +110,30 @@ export default createStore({
     },
     updateRemoveHighlight(state, val) {
       state.removeHighlight = val;
+    },
+    updateMapQuery(state, val) {
+      state.mapQuery = val;
+    },
+    updateAddRaster(state, val) {
+      state.addRaster = val;
+    },
+    updatePointCoord(state, val) {
+      state.pointCoord = val;
+    },
+    updateEvalCircle(state, val) {
+      state.evalCircle = val;
+    },
+    updateCircleFeatures(state, val) {
+      state.circleFeatures = val;
+    },
+    updateResultsFeatures(state, val) {
+      state.resultsFeatures = val;
+    },
+    updateFeatCounter(state, val) {
+      state.featCounter = val;
+    },
+    updateNonCoordLoc(state, val) {
+      state.nonCoordLoc = val;
     },
   },
 
