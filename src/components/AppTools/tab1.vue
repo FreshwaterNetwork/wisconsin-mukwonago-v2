@@ -25,6 +25,7 @@
           color="primary"
           label="Open Application"
           :to="app.tab == '2' ? { name: 'tab2' } : { name: 'tab3' }"
+          :disable="app.tab == '2' ? true : false"
         ></q-btn>
       </div>
     </div>
@@ -39,7 +40,7 @@ export default {
     return {
       appOptions: [
         {
-          name: 'Wetlands by Design: A Watershed Approach',
+          name: 'Coming Soon - Wetlands by Design: A Watershed Approach',
           description:
             'Wetlands can improve water quality, reduce flood impacts, help streams flow, provide habitat, and offer many other services. But not all wetlands provide the same services to the same degree! To find the best sites to restore and protect—and the most promising watersheds to work in—check out the Wetlands and Watersheds Explorer.',
           tab: '2',
