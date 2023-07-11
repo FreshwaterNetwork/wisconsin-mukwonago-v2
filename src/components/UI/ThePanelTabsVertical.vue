@@ -40,7 +40,7 @@
             <q-icon name="fas fa-info" size="lg"></q-icon>
           </q-route-tab>
           <q-separator></q-separator>
-          <q-route-tab
+          <!-- <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
             style="padding:10px; height: 31.5vh;"
             to="/tab2"
@@ -57,7 +57,7 @@
           >
             <q-icon name="fas fa-water" size="lg"></q-icon>
           </q-route-tab>
-          <q-separator></q-separator>
+          <q-separator></q-separator> -->
           <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
             style="padding:10px; height: 31.5vh;"
