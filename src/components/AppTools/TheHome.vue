@@ -24,7 +24,6 @@
         <q-btn
           color="primary"
           label="Open Application"
-          :to="app.tab == '2' ? { name: 'tab2' } : { name: 'tab3' }"
           @click="this.setApp(app)"
         ></q-btn>
       </div>
@@ -34,7 +33,7 @@
 
 <script>
 export default {
-  name: 'tab1',
+  name: 'Home',
   components: {},
   data() {
     return {
@@ -71,8 +70,11 @@ export default {
     setApp(val) {
       if (val.id == 1) {
         this.wbdApp = true;
-      } else {
+        this.$router.push('/wetlands-by-design');
+      }
+      if (val.id == 2) {
         this.wbdApp = false;
+        this.$router.push('/protecting-groundwater');
       }
     },
   },

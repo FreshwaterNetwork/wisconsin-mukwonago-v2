@@ -4,22 +4,17 @@ import SearchSite from '../components/UI/SearchSite.vue';
 import tabsVertical from '../components/UI/ThePanelTabsVertical.vue';
 
 const routes = [
-  // {
-  //   path: '/',
-  //   name: 'Home',
-  //   component: Home
-  // },
   {
     path: '/',
     beforeEnter: (to, from, next) => {
       // Your are free to add whatever logic here.
       // On first visit
-      next('/tab1');
+      next('/home');
     },
   },
   {
-    path: '/tab1',
-    name: 'tab1',
+    path: '/home',
+    name: 'home',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
