@@ -50,7 +50,7 @@ export default {
       if (this.type === 'close') {
         icon = 'fas fa-times';
         size = '9pt';
-        padding = '0px';
+        padding = '1px';
         tooltip = 'Close';
       }
       // show columns

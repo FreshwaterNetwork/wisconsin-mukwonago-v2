@@ -40,11 +40,12 @@
             <q-icon name="fas fa-info" size="lg"></q-icon>
           </q-route-tab>
           <q-separator></q-separator>
-          <!-- <q-route-tab
+          <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
             style="padding:10px; height: 31.5vh;"
-            to="/tab2"
-            name="tab2"
+            to="/wetlands-by-design"
+            name="wetlands-by-design"
+            @click="this.wbdApp = true"
           >
             <q-icon name="fas fa-water" size="sm"></q-icon>
             Wetlands <br />By Design
@@ -52,17 +53,19 @@
           <q-route-tab
             v-if="$store.state.condensedTabs || smallScreen"
             style="padding:10px;"
-            to="/tab2"
-            name="tab2"
+            to="/wetlands-by-design"
+            name="wetlands-by-design"
+            @click="this.wbdApp = true"
           >
             <q-icon name="fas fa-water" size="lg"></q-icon>
           </q-route-tab>
-          <q-separator></q-separator> -->
+          <q-separator></q-separator>
           <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
             style="padding:10px; height: 31.5vh;"
-            to="/tab3"
-            name="tab3"
+            to="/protecting-groundwater"
+            name="protecting-groundwater"
+            @click="this.wbdApp = false"
           >
             <q-icon name="fas fa-hand-holding-water" size="sm"></q-icon>
             Protecting <br />
@@ -73,8 +76,9 @@
           <q-route-tab
             v-if="$store.state.condensedTabs || smallScreen"
             style="padding:10px;"
-            to="/tab3"
-            name="tab3"
+            to="/protecting-groundwater"
+            name="protecting-groundwater"
+            @click="this.wbdApp = false"
           >
             <q-icon name="fa fa-hand-holding-water" size="lg"></q-icon>
           </q-route-tab>
@@ -96,7 +100,10 @@
             </q-scroll-area>
           </q-tab-panel>
 
-          <q-tab-panel name="tab2" class="q-pr-none q-pl-lg q-pt-lg q-pb-lg">
+          <q-tab-panel
+            name="wetlands-by-design"
+            class="q-pr-none q-pl-lg q-pt-lg q-pb-lg"
+          >
             <q-scroll-area
               id=""
               class="panel panelM"
@@ -108,7 +115,10 @@
             </q-scroll-area>
           </q-tab-panel>
 
-          <q-tab-panel name="tab3" class="q-pr-none q-pl-lg q-pt-lg q-pb-lg">
+          <q-tab-panel
+            name="protecting-groundwater"
+            class="q-pr-none q-pl-lg q-pt-lg q-pb-lg"
+          >
             <q-scroll-area
               id=""
               class="panel panelM"
@@ -146,6 +156,14 @@ export default {
   computed: {
     smallScreen() {
       return this.$q.screen.lt.sm;
+    },
+    wbdApp: {
+      get() {
+        return this.$store.state.wbdApp;
+      },
+      set(value) {
+        this.$store.commit('updateWbdApp', value);
+      },
     },
   },
 };

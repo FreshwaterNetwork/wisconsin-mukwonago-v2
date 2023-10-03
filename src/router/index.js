@@ -26,16 +26,16 @@ const routes = [
     component: tabsVertical,
   },
   {
-    path: '/tab2',
-    name: 'tab2',
+    path: '/wetlands-by-design',
+    name: 'wetlands-by-design',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: tabsVertical,
   },
   {
-    path: '/tab3',
-    name: 'tab3',
+    path: '/protecting-groundwater',
+    name: 'protecting-groundwater',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -45,6 +45,9 @@ const routes = [
         path: 'evaluate',
         name: 'EvaluateSite',
         component: EvaluateSite,
+        beforeEnter(to, from, next) {
+          next();
+        },
       },
       {
         path: 'search',

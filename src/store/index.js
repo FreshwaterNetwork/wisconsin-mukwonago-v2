@@ -52,7 +52,7 @@ export default createStore({
     hideControls: true,
     mapPrintURI: '',
     planType: '',
-    agreed: false,
+    agreed: true,
     selectedFeatures: [],
     locationValue: '',
     removeHighlight: false,
@@ -64,6 +64,18 @@ export default createStore({
     resultsFeatures: [],
     featCounter: 0,
     nonCoordLoc: false,
+    wetlandWatersheds: [],
+    projectType: 'new',
+    wbdApp: '',
+    showServices: false,
+    hideServices: false,
+    showNumServices: false,
+    hideNumServices: false,
+    serviceType: 'nos',
+    serviceOption: 'Count of Services ≥ High',
+    rfOption: 'Overall Feasibility',
+    option: 'Combined Services',
+    hucHover: false,
   },
   mutations: {
     //data retrieved from web services
@@ -134,6 +146,42 @@ export default createStore({
     },
     updateNonCoordLoc(state, val) {
       state.nonCoordLoc = val;
+    },
+    updateWetlandWatersheds(state, val) {
+      state.wetlandWatersheds = val;
+    },
+    updateProjectType(state, val) {
+      state.projectType = val;
+    },
+    updateWbdApp(state, val) {
+      state.wbdApp = val;
+    },
+    updateShowServices(state, val) {
+      state.showServices = val;
+    },
+    updateHideNumServices(state, val) {
+      state.hideNumServices = val;
+    },
+    updateHideServices(state, val) {
+      state.hideServices = val;
+    },
+    updateShowNumServices(state, val) {
+      state.showNumServices = val;
+    },
+    updateServiceType(state, val) {
+      state.serviceType = val;
+    },
+    updateServiceOption(state, val) {
+      state.serviceOption = val;
+    },
+    updateRfOption(state, val) {
+      state.rfOption = val;
+    },
+    updateOption(state, val) {
+      state.option = val;
+    },
+    updateHucHover(state, val) {
+      state.hucHover = val;
     },
   },
 
