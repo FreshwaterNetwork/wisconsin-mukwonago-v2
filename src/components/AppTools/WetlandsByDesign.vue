@@ -214,7 +214,7 @@
                 </div>
               </div>
             </q-expansion-item>
-            <div style="max-width: 350px" v-if="this.hucHover == true">
+            <!-- <div style="max-width: 350px" v-if="this.hucHover == true">
               <q-list dense bordered padding class="rounded-borders">
                 <q-item>
                   <q-item-section>
@@ -252,7 +252,7 @@
                   </q-item-section>
                 </q-item>
               </q-list>
-            </div>
+            </div> -->
             <!-- <div v-if="rangeOfService == true">
 
             </div> -->
@@ -261,7 +261,23 @@
       </div>
       <!-- Existing Site -->
       <div v-if="this.projectType === 'existing'">
-        <span>This is an existing project</span>
+        <div style="display: flex;">
+          <q-input
+            outlined
+            v-model="locationValue"
+            for="locationID"
+            label="Location or Address"
+            style="display:block; margin:auto 5px auto auto;"
+            @input="locationValue"
+          />
+          <q-btn
+            round
+            color="primary"
+            icon="search"
+            style="margin: auto auto auto 5px"
+            @click="updateLocationValue"
+          />
+        </div>
       </div>
     </div>
   </div>

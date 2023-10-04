@@ -55,8 +55,8 @@ import Graphic from '@arcgis/core/Graphic.js';
 import Circle from '@arcgis/core/geometry/Circle.js';
 import Point from '@arcgis/core/geometry/Point.js';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol.js';
-import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer.js';
-import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
+// import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer.js';
+// import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
 // import FeatureSet from '@arcgis/core/rest/support/FeatureSet.js';
 // import Extent from '@arcgis/core/geometry/Extent.js';
 // import Renderer from '@arcgis/core/renderers/Renderer.js';
@@ -365,7 +365,6 @@ export default {
             'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer',
           title: '',
           sublayers: [
-            { id: 0, title: 'HUC - Mask', visible: false, opacity: 0.3 },
             {
               id: 1,
               title: 'HUC - 6 - Boundary',
@@ -717,6 +716,7 @@ export default {
             { id: 67, title: 'wetlands_0707002', visible: false, opacity: 0.7 },
             { id: 68, title: 'wetlands_070900', visible: false, opacity: 0.7 },
             { id: 69, title: 'wetlands_071200', visible: false, opacity: 0.7 },
+            { id: 0, title: 'HUC - Mask', visible: false, opacity: 0.7 },
           ],
         });
 
@@ -727,10 +727,10 @@ export default {
         esri.map.remove(muk_streams);
 
         let hucMaskLayerView = '';
-        let huc6wsLayerView = '';
+        // let huc6wsLayerView = '';
         let huc8wsLayerView = '';
         let huc10wsLayerView = '';
-        let huc12wsLayerView = '';
+        // let huc12wsLayerView = '';
 
         esri.mapView.goTo({ center: c, zoom: z });
 
@@ -738,9 +738,9 @@ export default {
           hucMaskLayerView = layerView;
         });
 
-        esri.mapView.whenLayerView(huc6ws).then(function(layerView) {
-          huc6wsLayerView = layerView;
-        });
+        // esri.mapView.whenLayerView(huc6ws).then(function(layerView) {
+        //   huc6wsLayerView = layerView;
+        // });
 
         esri.mapView.whenLayerView(huc8ws).then(function(layerView) {
           huc8wsLayerView = layerView;
@@ -750,19 +750,19 @@ export default {
           huc10wsLayerView = layerView;
         });
 
-        esri.mapView.whenLayerView(huc12ws).then(function(layerView) {
-          huc12wsLayerView = layerView;
-        });
+        // esri.mapView.whenLayerView(huc12ws).then(function(layerView) {
+        //   huc12wsLayerView = layerView;
+        // });
 
         console.log(
           huc8ws,
           huc10ws,
           huc12ws,
           hucMask,
-          huc6wsLayerView,
+          // huc6wsLayerView,
           huc8wsLayerView,
           huc10wsLayerView,
-          huc12wsLayerView,
+          // huc12wsLayerView,
           hucMaskLayerView
         );
         esri.map.add(esri.mapImage);
@@ -1668,16 +1668,40 @@ export default {
       url:
         'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/2',
       outFields: ['*'],
+      opacity: 0.5,
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'simple-fill',
+          color: [150, 204, 193, 0.5],
+        },
+      },
     });
     const huc10ws = new FeatureLayer({
       url:
         'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/3',
       outFields: ['*'],
+      opacity: 0.5,
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'simple-fill',
+          color: [150, 204, 193, 0.5],
+        },
+      },
     });
     const huc12ws = new FeatureLayer({
       url:
         'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/4',
       outFields: ['*'],
+      opacity: 0.5,
+      renderer: {
+        type: 'simple',
+        symbol: {
+          type: 'simple-fill',
+          color: [150, 204, 193, 0.5],
+        },
+      },
     });
 
     _this.$watch('mapQuery', () => {
@@ -1832,31 +1856,28 @@ export default {
             if (name) {
               if (this.h6 == false) {
                 huc = hitGraphic.attributes.WHUC6;
-                query = huc6ws.createQuery();
+                query = hucMask.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                this.hucHover = true;
-              } else if (
-                /* this.h6 == true && this.h8 == false */ hitGraphic.attributes
-                  .WHUC8
-              ) {
+                // this.hucHover = true;
+              } else if (this.h6 == true && this.h8 == false) {
                 huc = hitGraphic.attributes.WHUC8;
                 query = huc8ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                this.hucHover = true;
+                // this.hucHover = true;
               } else if (this.h8 == true && this.h10 == false) {
                 huc = hitGraphic.attributes.WHUC10;
                 query = huc10ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                this.hucHover = true;
+                // this.hucHover = true;
               } else if (this.h10 == true && this.h8 == false) {
                 huc = hitGraphic.attributes.WHUC12;
                 query = huc12ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                this.hucHover = true;
+                // this.hucHover = true;
               } else {
                 this.hucHover = false;
               }
@@ -1973,17 +1994,12 @@ export default {
       } else if (_this.wbdApp == true) {
         console.log('you clicked the wetlands app');
 
-        let graphicsLayer;
-
         let huc6 = '';
         let huc8 = '';
         let huc10 = '';
         let huc12 = '';
 
         let query;
-        let query2;
-        let query3;
-        let query4;
 
         let point = new Point({
           x: response.mapPoint.longitude,
@@ -2004,175 +2020,59 @@ export default {
 
           huc6ws.queryFeatures(query).then(function(result) {
             let feature = result.features[0].attributes;
-
             huc6 = { desc: 'HUC 6', name: feature.name, huc: feature.WHUC6 };
-
             _this.selectedHuc = feature.WHUC6;
-
             _this.h6 = true;
-
             _this.wetlandWatersheds.push(huc6);
-
             _this.showServices = true;
 
-            query2 = huc8ws.createQuery();
-            query2.where = "WHUC6 = '" + _this.selectedHuc + "'";
-
-            huc8ws.queryFeatures(query2).then(function(result) {
-              let featGraphic;
-              // let featureGraphics = [];
-              console.log(result.features);
-
-              result.features.forEach((feat) => {
-                featGraphic = new Graphic({
-                  geometry: feat.geometry,
-                  attributes: feat.attributes,
-                  symbol: new SimpleFillSymbol({
-                    color: [150, 204, 193, 0.5],
-                  }),
-                });
-
-                featureGraphics.push(featGraphic);
-              });
-
-              graphicsLayer = new GraphicsLayer({
-                id: 70,
-                graphics: featureGraphics,
-              });
-
-              graphicsLayer.opacity = 0.5;
-              // esri.map.remove(huc6ws);
-              // esri.map.add(huc8ws);
-              esri.map.add(graphicsLayer);
-
-              esri.mapView.whenLayerView(huc8ws).then((lv) => {
-                _this.applyFilter(lv, 'WHUC6');
-              });
-
-              esri.mapView.goTo(graphicsLayer.graphics);
+            esri.map.add(huc8ws);
+            huc8ws.definitionExpression = "WHUC6 = '" + _this.selectedHuc + "'";
+            huc8ws.queryExtent().then(function(results) {
+              esri.mapView.goTo(results.extent);
             });
           });
         } else if (_this.h6 == true && _this.h8 == false) {
-          esri.map.layers.items.forEach((item) => {
-            if (item.id == 70) {
-              esri.map.layers.items.pop(item);
-            }
-          });
+          esri.map.remove(huc8ws);
+          esri.mapImage.findSublayerById(2).visible = false;
+          esri.mapImage.findSublayerById(3).visible = true;
 
           query = huc8ws.createQuery(point);
           query.geometry = point;
-
-          esri.mapImage.findSublayerById(2).visible = false;
-          esri.mapImage.findSublayerById(3).visible = true;
-          esri.mapImage.findSublayerById(0).visible = true;
-
           huc8ws.queryFeatures(query).then(function(result) {
             let feature = result.features[0].attributes;
-
             huc8 = { desc: 'HUC 8', name: feature.name, huc: feature.WHUC8 };
-
             _this.selectedHuc = feature.WHUC8;
-
             _this.wetlandWatersheds.push(huc8);
-
             _this.h8 = true;
 
-            query3 = huc10ws.createQuery();
-            query3.where = "WHUC8 = '" + _this.selectedHuc + "'";
-
-            huc10ws.queryFeatures(query3).then(function(result) {
-              let featGraphic;
-              // let featureGraphics = [];
-
-              result.features.forEach((feat) => {
-                featGraphic = new Graphic({
-                  geometry: feat.geometry,
-                  attributes: feat.attributes,
-                  symbol: new SimpleFillSymbol({
-                    color: [150, 204, 193, 0.5],
-                  }),
-                });
-
-                featureGraphics.push(featGraphic);
-              });
-
-              graphicsLayer = new GraphicsLayer({
-                id: 70,
-                graphics: featureGraphics,
-              });
-
-              graphicsLayer.opacity = 0.5;
-              esri.map.remove(huc8ws);
-              // esri.map.add(huc10ws);
-              esri.map.add(graphicsLayer);
-              // esri.mapView.whenLayerView(huc10ws).then((lv) => {
-              //   _this.applyFilter(lv, 'WHUC8');
-              // });
-              esri.mapView.goTo(graphicsLayer.graphics);
+            esri.map.add(huc10ws);
+            huc10ws.definitionExpression =
+              "WHUC8 = '" + _this.selectedHuc + "'";
+            huc10ws.queryExtent().then(function(results) {
+              esri.mapView.goTo(results.extent);
             });
           });
         } else if (_this.h8 == true && _this.h10 == false) {
-          esri.map.layers.items.forEach((item) => {
-            if (item.id == 70) {
-              esri.map.layers.items.pop(item);
-            }
-          });
-          esri.map.remove(graphicsLayer);
-          query = huc10ws.createQuery(point);
-          query.geometry = point;
-
+          esri.map.remove(huc10ws);
           esri.mapImage.findSublayerById(3).visible = false;
           esri.mapImage.findSublayerById(4).visible = true;
-          esri.mapImage.findSublayerById(0).visible = true;
 
+          query = huc10ws.createQuery(point);
+          query.geometry = point;
           huc10ws.queryFeatures(query).then(function(result) {
             let feature = result.features[0].attributes;
-
             huc10 = { desc: 'HUC 10', name: feature.name, huc: feature.WHUC10 };
-
             _this.selectedHuc = feature.WHUC10;
-
             _this.wetlandWatersheds.push(huc10);
-
             _this.h10 = true;
             _this.h12 = true;
 
-            query4 = huc12ws.createQuery();
-            query4.where = "WHUC10 = '" + _this.selectedHuc + "'";
-
-            huc12ws.queryFeatures(query4).then(function(result) {
-              let featGraphic;
-              // let featureGraphics = [];
-
-              result.features.forEach((feat) => {
-                featGraphic = new Graphic({
-                  geometry: feat.geometry,
-                  attributes: feat.attributes,
-                  symbol: new SimpleFillSymbol({
-                    color: [150, 204, 193, 0.5],
-                  }),
-                });
-
-                featureGraphics.push(featGraphic);
-              });
-
-              graphicsLayer = new GraphicsLayer({
-                id: 70,
-                graphics: featureGraphics,
-              });
-
-              console.log(esri.map.layers);
-
-              graphicsLayer.opacity = 0.5;
-              esri.map.remove(huc10ws);
-              // esri.map.add(huc12ws);
-              // esri.mapView.whenLayerView(huc12ws).then((lv) => {
-              //   _this.applyFilter(lv, 'WHUC10');
-              // });
-              esri.map.add(graphicsLayer);
-              esri.mapView.goTo(graphicsLayer.graphics);
-
-              console.log(graphicsLayer.graphics.items);
+            esri.map.add(huc12ws);
+            huc12ws.definitionExpression =
+              "WHUC10 = '" + _this.selectedHuc + "'";
+            huc12ws.queryExtent().then(function(results) {
+              esri.mapView.goTo(results.extent);
             });
           });
         } else if (_this.h10 == true && _this.h12 == true) {
@@ -2182,19 +2082,23 @@ export default {
             }
           });
 
+          console.log(esri.map);
+
           esri.mapImage.findSublayerById(3).visible = false;
           esri.mapImage.findSublayerById(4).visible = true;
-          esri.mapImage.findSublayerById(0).visible = true;
+
+          console.log(_this.selectedHuc);
 
           if (_this.wetlandWatersheds.length <= 3) {
-            query = huc12ws.createQuery(point);
-            query.geometry = point;
-            // query.where = "WHUC12 = '" + _this.selectedHuc + "'";
+            esri.map.remove(huc12ws);
 
             _this.showServices = false;
             _this.showNumServices = true;
 
+            query = huc12ws.createQuery(point);
+            query.geometry = point;
             huc12ws.queryFeatures(query).then(function(result) {
+              console.log(result);
               let feature = result.features[0].attributes;
 
               huc12 = {
@@ -2204,6 +2108,9 @@ export default {
               };
 
               _this.selectedHuc = feature.WHUC12;
+
+              esri.mapImage.findSublayerById(0).definitionExpression =
+                "WHUC12 <> '" + _this.selectedHuc + "'";
 
               _this.wetlandWatersheds.push(huc12);
 
@@ -2221,13 +2128,6 @@ export default {
                   let selection12 = esri.mapImage.findSublayerById(layerIndex);
 
                   selection12.visible = true;
-                  esri.mapImage.findSublayerById(4).visible = false;
-                  esri.mapImage.findSublayerById(0).visible = false;
-
-                  esri.mapView.whenLayerView(selection12).then((lv) => {
-                    _this.applyFilter(lv, 'WHUC12');
-                    console.log('apply filter method');
-                  });
                 }
               });
 
