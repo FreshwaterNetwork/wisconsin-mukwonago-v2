@@ -25,8 +25,8 @@
           <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
             style="padding: 10px; height: 31.5vh"
-            to="/Home"
-            name="home"
+            to="/get-started"
+            name="get-started"
           >
             <q-icon name="fas fa-info" size="sm" />
             Get <br />Started
@@ -34,8 +34,8 @@
           <q-route-tab
             v-if="$store.state.condensedTabs || smallScreen"
             style="padding: 10px"
-            to="/Home"
-            name="home"
+            to="/get-started"
+            name="get-started"
           >
             <q-icon name="fas fa-info" size="lg"></q-icon>
           </q-route-tab>
@@ -88,14 +88,17 @@
 
       <template v-slot:after>
         <q-tab-panels v-model="tab" animated vertical keep-alive>
-          <q-tab-panel name="home" class="q-pr-none q-pl-lg q-pt-lg q-pb-lg">
+          <q-tab-panel
+            name="get-started"
+            class="q-pr-none q-pl-lg q-pt-lg q-pb-lg"
+          >
             <q-scroll-area
               id=""
               class="panel panelM"
               :thumb-style="{ width: '7px' }"
             >
               <div class="q-mr-lg">
-                <keep-alive><the-home></the-home></keep-alive>
+                <keep-alive><get-started></get-started></keep-alive>
               </div>
             </q-scroll-area>
           </q-tab-panel>
@@ -140,14 +143,14 @@
 </template>
 
 <script>
-import TheHome from '../AppTools/TheHome.vue';
+import GetStarted from '../AppTools/GetStarted.vue';
 import WetlandsByDesign from '../AppTools/WetlandsByDesign.vue';
 import ProtectingGroundwater from '../AppTools/ProtectingGroundwater.vue';
 
 export default {
   name: 'ThePanelTabsVertical',
   components: {
-    TheHome,
+    GetStarted,
     WetlandsByDesign,
     ProtectingGroundwater,
   },
