@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import store from '../store/index.js';
 import EvaluateSite from '../components/UI/EvaluateSite.vue';
 import SearchSite from '../components/UI/SearchSite.vue';
 import tabsVertical from '../components/UI/ThePanelTabsVertical.vue';
@@ -27,6 +28,10 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: tabsVertical,
+    async beforeEnter(to, from, next) {
+      await store.commit('updateWbdApp', true);
+      next();
+    },
   },
   {
     path: '/protecting-groundwater',
@@ -35,6 +40,10 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: tabsVertical,
+    async beforeEnter(to, from, next) {
+      await store.commit('updateWbdApp', false);
+      next();
+    },
     children: [
       {
         path: 'evaluate',

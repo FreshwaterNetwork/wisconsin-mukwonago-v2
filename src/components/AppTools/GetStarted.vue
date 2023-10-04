@@ -69,11 +69,9 @@ export default {
   methods: {
     setApp(val) {
       if (val.id == 1) {
-        this.wbdApp = true;
         this.$router.push('/wetlands-by-design');
       }
       if (val.id == 2) {
-        this.wbdApp = false;
         this.$router.push('/protecting-groundwater');
       }
     },

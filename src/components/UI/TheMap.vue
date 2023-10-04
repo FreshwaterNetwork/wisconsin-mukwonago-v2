@@ -2026,11 +2026,13 @@ export default {
             _this.wetlandWatersheds.push(huc6);
             _this.showServices = true;
 
-            esri.map.add(huc8ws);
-            huc8ws.definitionExpression = "WHUC6 = '" + _this.selectedHuc + "'";
-            huc8ws.queryExtent().then(function(results) {
-              esri.mapView.goTo(results.extent);
-            });
+            esri.defExp = "WHUC6 = '" + _this.selectedHuc + "'";
+            _this.updateFeatureLayer(30);
+            // esri.map.add(huc8ws);
+            // huc8ws.definitionExpression = "WHUC6 = '" + _this.selectedHuc + "'";
+            // huc8ws.queryExtent().then(function(results) {
+            //   esri.mapView.goTo(results.extent);
+            // });
           });
         } else if (_this.h6 == true && _this.h8 == false) {
           esri.map.remove(huc8ws);
@@ -2046,12 +2048,14 @@ export default {
             _this.wetlandWatersheds.push(huc8);
             _this.h8 = true;
 
-            esri.map.add(huc10ws);
-            huc10ws.definitionExpression =
-              "WHUC8 = '" + _this.selectedHuc + "'";
-            huc10ws.queryExtent().then(function(results) {
-              esri.mapView.goTo(results.extent);
-            });
+            esri.defExp = "WHUC8 = '" + _this.selectedHuc + "'";
+            _this.updateFeatureLayer(31);
+            //esri.map.add(huc10ws);
+            // huc10ws.definitionExpression =
+            //   "WHUC8 = '" + _this.selectedHuc + "'";
+            // huc10ws.queryExtent().then(function(results) {
+            //   esri.mapView.goTo(results.extent);
+            // });
           });
         } else if (_this.h8 == true && _this.h10 == false) {
           esri.map.remove(huc10ws);
@@ -2521,6 +2525,23 @@ export default {
   },
 
   methods: {
+    updateFeatureLayer(id) {
+      if (esri.featureLayer) {
+        esri.featureLayer.destroy();
+      }
+      esri.featureLayer = new FeatureLayer({
+        url:
+          'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/' +
+          id,
+        outFields: ['*'],
+      });
+      esri.map.add(esri.featureLayer);
+      esri.featureLayer.definitionExpression = esri.defExp;
+      esri.featureLayer.queryExtent().then(function(results) {
+        esri.mapView.goTo(results.extent);
+      });
+    },
+
     updateSupportingVisibility() {
       // turn off all raster layer visibility
       esri.map.layers.items.forEach((fl) => {
