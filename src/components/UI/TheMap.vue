@@ -29,6 +29,7 @@
         @click="clearMeasurements()"
       ></button>
     </div>
+    <div id="sketchTools"></div>
     <div id="info">
       <span id="name"></span>
       <span id="huc"></span>
@@ -53,6 +54,7 @@ import PortalBasemapsSource from '@arcgis/core/widgets/BasemapGallery/support/Po
 import Portal from '@arcgis/core/portal/Portal';
 import Graphic from '@arcgis/core/Graphic.js';
 import Circle from '@arcgis/core/geometry/Circle.js';
+import Sketch from '@arcgis/core/widgets/Sketch';
 import Point from '@arcgis/core/geometry/Point.js';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol.js';
 // import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer.js';
@@ -73,6 +75,7 @@ let esri = {
   measurement: '',
   lgExpand: '',
   mapImage: '',
+  sketch: '',
 };
 
 export default {
@@ -142,6 +145,7 @@ export default {
       h10: false,
       h12: false,
       selectedHuc: '',
+      layerIndex: 0,
     };
   },
   computed: {
@@ -276,6 +280,22 @@ export default {
         this.$store.commit('updateServiceOption', value);
       },
     },
+    rfOption: {
+      get() {
+        return this.$store.state.rfOption;
+      },
+      set(value) {
+        this.$store.commit('updateRfOption', value);
+      },
+    },
+    option: {
+      get() {
+        return this.$store.state.option;
+      },
+      set(value) {
+        this.$store.commit('updateOption', value);
+      },
+    },
     hucHover: {
       get() {
         return this.$store.state.hucHover;
@@ -283,6 +303,37 @@ export default {
       set(value) {
         this.$store.commit('updateHucHover', value);
       },
+    },
+    rangeOfService: {
+      get() {
+        return this.$store.state.rangeOfService;
+      },
+      set(value) {
+        this.$store.commit('updateRangeOfService', value);
+      },
+    },
+    guild: {
+      get() {
+        return this.$store.state.guild;
+      },
+      set(value) {
+        this.$store.commit('updateGuild', value);
+      },
+    },
+    optionLayers() {
+      return this.$store.state.optionLayers;
+    },
+    rfLayer() {
+      return this.$store.state.rfLayer;
+    },
+    serviceLayer() {
+      return this.$store.state.serviceLayer;
+    },
+    guildLayer() {
+      return this.$store.state.guildLayer;
+    },
+    removeGuild() {
+      return this.$store.state.removeGuild;
     },
   },
   watch: {
@@ -322,6 +373,74 @@ export default {
     },
     planType() {
       esri.mapView.graphics.removeAll();
+    },
+    optionLayers() {
+      console.log(this.optionLayers);
+      console.log(this.wetlandWatersheds.length);
+      if (this.wetlandWatersheds.length == 1) {
+        this.updateFeatureLayer(this.optionLayers.id8);
+        console.log(this.optionLayers.id8);
+      } else if (this.wetlandWatersheds.length == 2) {
+        this.updateFeatureLayer(this.optionLayers.id10);
+      } else if (this.wetlandWatersheds.length == 3) {
+        this.updateFeatureLayer(this.optionLayers.id12);
+      }
+    },
+    removeGuild() {
+      if (this.removeGuild == true) {
+        esri.mapImage.findSublayerById(48).visible = false;
+        esri.mapImage.findSublayerById(49).visible = false;
+        esri.mapImage.findSublayerById(50).visible = false;
+        esri.mapImage.findSublayerById(51).visible = false;
+        esri.mapImage.findSublayerById(52).visible = false;
+        esri.mapImage.findSublayerById(53).visible = false;
+        this.removeGuild == false;
+      }
+    },
+    guildLayer() {
+      //figure out how to remove previous guild layer
+      esri.mapImage.findSublayerById(48).visible = false;
+      esri.mapImage.findSublayerById(49).visible = false;
+      esri.mapImage.findSublayerById(50).visible = false;
+      esri.mapImage.findSublayerById(51).visible = false;
+      esri.mapImage.findSublayerById(52).visible = false;
+      esri.mapImage.findSublayerById(53).visible = false;
+
+      esri.mapImage.findSublayerById(this.guildLayer).visible = true;
+    },
+    serviceOption() {
+      esri.mapImage.findSublayerById(this.layerIndex).visible = false;
+
+      esri.mapImage.sublayers.forEach((layer) => {
+        if (layer.title == 'Current Wetlands - ' + this.serviceOption) {
+          this.layerIndex = layer.id;
+          esri.mapImage.findSublayerById(this.layerIndex).visible = true;
+        }
+      });
+    },
+    serviceType() {
+      if (this.serviceType === 'rf') {
+        if (esri.mapImage.findSublayerById(this.layerIndex).visible == true) {
+          esri.mapImage.findSublayerById(this.layerIndex).visible = false;
+        }
+        esri.mapImage.findSublayerById(57).visible = true;
+        esri.mapImage.findSublayerById(this.rfLayer).visible = true;
+      } else if (this.serviceType === 'nos') {
+        if (esri.mapImage.findSublayerById(this.rfLayer).visible == true) {
+          esri.mapImage.findSublayerById(this.rfLayer).visible = false;
+        }
+        esri.mapImage.findSublayerById(57).visible = false;
+
+        esri.mapImage.findSublayerById(this.layerIndex).visible = true;
+      }
+    },
+    rfLayer() {
+      esri.mapImage.findSublayerById(54).visible = false;
+      esri.mapImage.findSublayerById(55).visible = false;
+      esri.mapImage.findSublayerById(56).visible = false;
+
+      esri.mapImage.findSublayerById(57).visible = true;
+      esri.mapImage.findSublayerById(this.rfLayer).visible = true;
     },
   },
 
@@ -368,7 +487,7 @@ export default {
             {
               id: 1,
               title: 'HUC - 6 - Boundary',
-              visible: true,
+              visible: false,
               opacity: 0.7,
             },
             {
@@ -766,6 +885,7 @@ export default {
           hucMaskLayerView
         );
         esri.map.add(esri.mapImage);
+        _this.updateFeatureLayer(1);
       } else {
         z = 10;
         c = [-88.47431, 42.879521];
@@ -1530,8 +1650,6 @@ export default {
         esri.map.add(muk_fens);
         esri.map.add(muk_streams);
       }
-
-      console.log(this.wbdApp);
     });
 
     esri.mapView = new MapView({
@@ -1668,40 +1786,16 @@ export default {
       url:
         'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/2',
       outFields: ['*'],
-      opacity: 0.5,
-      renderer: {
-        type: 'simple',
-        symbol: {
-          type: 'simple-fill',
-          color: [150, 204, 193, 0.5],
-        },
-      },
     });
     const huc10ws = new FeatureLayer({
       url:
         'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/3',
       outFields: ['*'],
-      opacity: 0.5,
-      renderer: {
-        type: 'simple',
-        symbol: {
-          type: 'simple-fill',
-          color: [150, 204, 193, 0.5],
-        },
-      },
     });
     const huc12ws = new FeatureLayer({
       url:
         'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/4',
       outFields: ['*'],
-      opacity: 0.5,
-      renderer: {
-        type: 'simple',
-        symbol: {
-          type: 'simple-fill',
-          color: [150, 204, 193, 0.5],
-        },
-      },
     });
 
     _this.$watch('mapQuery', () => {
@@ -1784,64 +1878,6 @@ export default {
 
     esri.mapView.ui.add('info', 'top-right');
 
-    // esri.mapView
-    //   .when()
-    //   .then(() => {
-    //     return huc6ws.when();
-    //   })
-    //   .then((huc6ws) => {
-    //     return esri.mapView.whenLayerView(huc6ws);
-    //   })
-    //   .then((huc6wsLayerView) => {
-    //     esri.mapView.on('pointer-move', eventHandler);
-    //     esri.mapView.on('pointer-down', eventHandler);
-
-    //     function eventHandler(event) {
-    //       const opts = {
-    //         include: huc6ws,
-    //         huc8ws,
-    //         huc10ws,
-    //         huc12ws,
-    //       };
-
-    //       // let lay;
-
-    //       // opts.forEach((i) => {
-    //       //   lay = i;
-    //       // });
-
-    //       esri.mapView.hitTest(event, opts).then(getGraphics());
-    //     }
-
-    //     let currentHuc, currentName;
-
-    //     console.log(currentHuc, currentName);
-
-    //     function getGraphics(response) {
-    //       if (response.results.length) {
-    //         let lay = huc6ws;
-    //         console.log(huc6wsLayerView);
-
-    //         const graphic = response.results[0].graphic;
-    //         const name = graphic.attributes.name;
-    //         const huc = graphic.attributes.WHUC6;
-
-    //         document.getElementById('info').style.visibility = 'visible';
-    //         document.getElementById('huc').innerHTML = huc;
-    //         document.getElementById('name').innerHTML = name + ' - ';
-
-    //         const query = lay.createQuery();
-    //         query.where = 'OBJECTID = ' + graphic.attributes.OBJECTID;
-    //         lay.queryFeatures(query).then(() => {
-    //           currentHuc = huc;
-    //           currentName = name;
-    //         });
-    //       } else {
-    //         document.getElementById('info').style.visibility = 'hidden';
-    //       }
-    //     }
-    //   });
-
     esri.mapView.on('pointer-move', (event) => {
       if (this.wbdApp == true) {
         let huc;
@@ -1856,28 +1892,25 @@ export default {
             if (name) {
               if (this.h6 == false) {
                 huc = hitGraphic.attributes.WHUC6;
-                query = hucMask.createQuery();
+                console.log(huc);
+                query = huc6ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                // this.hucHover = true;
               } else if (this.h6 == true && this.h8 == false) {
                 huc = hitGraphic.attributes.WHUC8;
                 query = huc8ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                // this.hucHover = true;
               } else if (this.h8 == true && this.h10 == false) {
                 huc = hitGraphic.attributes.WHUC10;
                 query = huc10ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                // this.hucHover = true;
               } else if (this.h10 == true && this.h8 == false) {
                 huc = hitGraphic.attributes.WHUC12;
                 query = huc12ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
-                // this.hucHover = true;
               } else {
                 this.hucHover = false;
               }
@@ -1992,13 +2025,10 @@ export default {
           _this.evalCircle = true;
         }
       } else if (_this.wbdApp == true) {
-        console.log('you clicked the wetlands app');
-
-        let huc6 = '';
-        let huc8 = '';
-        let huc10 = '';
-        let huc12 = '';
-
+        let huc6 = {};
+        let huc8 = {};
+        let huc10 = {};
+        let huc12 = {};
         let query;
 
         let point = new Point({
@@ -2006,139 +2036,141 @@ export default {
           y: response.mapPoint.latitude,
         });
 
-        let featureGraphics = [];
+        const opts = {
+          include: esri.featureLayer,
+        };
 
-        console.log(featureGraphics);
+        esri.mapView.hitTest(response, opts).then((e) => {
+          if (e.results.length > 0) {
+            if (_this.h6 == false) {
+              query = huc6ws.createQuery(point);
+              query.geometry = point;
 
-        if (_this.h6 == false) {
-          query = huc6ws.createQuery(point);
-          query.geometry = point;
+              esri.mapImage.findSublayerById(0).visible = true;
+              esri.mapImage.findSublayerById(1).visible = false;
+              esri.mapImage.findSublayerById(2).visible = true;
 
-          esri.mapImage.findSublayerById(0).visible = true;
-          esri.mapImage.findSublayerById(1).visible = false;
-          esri.mapImage.findSublayerById(2).visible = true;
+              huc6ws.queryFeatures(query).then(function(result) {
+                let feature = result.features[0].attributes;
+                huc6 = {
+                  desc: 'HUC 6',
+                  name: feature.name,
+                  huc: feature.WHUC6,
+                };
+                _this.selectedHuc = feature.WHUC6;
+                _this.h6 = true;
+                _this.wetlandWatersheds.push(huc6);
+                _this.showServices = true;
+                _this.rangeOfService = true;
 
-          huc6ws.queryFeatures(query).then(function(result) {
-            let feature = result.features[0].attributes;
-            huc6 = { desc: 'HUC 6', name: feature.name, huc: feature.WHUC6 };
-            _this.selectedHuc = feature.WHUC6;
-            _this.h6 = true;
-            _this.wetlandWatersheds.push(huc6);
-            _this.showServices = true;
+                esri.defExp = "WHUC6 = '" + _this.selectedHuc + "'";
 
-            esri.defExp = "WHUC6 = '" + _this.selectedHuc + "'";
-            _this.updateFeatureLayer(30);
-            // esri.map.add(huc8ws);
-            // huc8ws.definitionExpression = "WHUC6 = '" + _this.selectedHuc + "'";
-            // huc8ws.queryExtent().then(function(results) {
-            //   esri.mapView.goTo(results.extent);
-            // });
-          });
-        } else if (_this.h6 == true && _this.h8 == false) {
-          esri.map.remove(huc8ws);
-          esri.mapImage.findSublayerById(2).visible = false;
-          esri.mapImage.findSublayerById(3).visible = true;
-
-          query = huc8ws.createQuery(point);
-          query.geometry = point;
-          huc8ws.queryFeatures(query).then(function(result) {
-            let feature = result.features[0].attributes;
-            huc8 = { desc: 'HUC 8', name: feature.name, huc: feature.WHUC8 };
-            _this.selectedHuc = feature.WHUC8;
-            _this.wetlandWatersheds.push(huc8);
-            _this.h8 = true;
-
-            esri.defExp = "WHUC8 = '" + _this.selectedHuc + "'";
-            _this.updateFeatureLayer(31);
-            //esri.map.add(huc10ws);
-            // huc10ws.definitionExpression =
-            //   "WHUC8 = '" + _this.selectedHuc + "'";
-            // huc10ws.queryExtent().then(function(results) {
-            //   esri.mapView.goTo(results.extent);
-            // });
-          });
-        } else if (_this.h8 == true && _this.h10 == false) {
-          esri.map.remove(huc10ws);
-          esri.mapImage.findSublayerById(3).visible = false;
-          esri.mapImage.findSublayerById(4).visible = true;
-
-          query = huc10ws.createQuery(point);
-          query.geometry = point;
-          huc10ws.queryFeatures(query).then(function(result) {
-            let feature = result.features[0].attributes;
-            huc10 = { desc: 'HUC 10', name: feature.name, huc: feature.WHUC10 };
-            _this.selectedHuc = feature.WHUC10;
-            _this.wetlandWatersheds.push(huc10);
-            _this.h10 = true;
-            _this.h12 = true;
-
-            esri.map.add(huc12ws);
-            huc12ws.definitionExpression =
-              "WHUC10 = '" + _this.selectedHuc + "'";
-            huc12ws.queryExtent().then(function(results) {
-              esri.mapView.goTo(results.extent);
-            });
-          });
-        } else if (_this.h10 == true && _this.h12 == true) {
-          esri.map.layers.items.forEach((item) => {
-            if (item.id == 70) {
-              esri.map.layers.items.pop(item);
-            }
-          });
-
-          console.log(esri.map);
-
-          esri.mapImage.findSublayerById(3).visible = false;
-          esri.mapImage.findSublayerById(4).visible = true;
-
-          console.log(_this.selectedHuc);
-
-          if (_this.wetlandWatersheds.length <= 3) {
-            esri.map.remove(huc12ws);
-
-            _this.showServices = false;
-            _this.showNumServices = true;
-
-            query = huc12ws.createQuery(point);
-            query.geometry = point;
-            huc12ws.queryFeatures(query).then(function(result) {
-              console.log(result);
-              let feature = result.features[0].attributes;
-
-              huc12 = {
-                desc: 'HUC 12',
-                name: feature.name,
-                huc: feature.WHUC12,
-              };
-
-              _this.selectedHuc = feature.WHUC12;
-
-              esri.mapImage.findSublayerById(0).definitionExpression =
-                "WHUC12 <> '" + _this.selectedHuc + "'";
-
-              _this.wetlandWatersheds.push(huc12);
-
-              _this.h12 = true;
-
-              console.log('entered huc12 query');
-
-              esri.mapImage.sublayers.forEach((layer) => {
-                if (
-                  layer.title ==
-                  'Current Wetlands - ' + _this.serviceOption
-                ) {
-                  let layerIndex;
-                  layerIndex = layer.id;
-                  let selection12 = esri.mapImage.findSublayerById(layerIndex);
-
-                  selection12.visible = true;
-                }
+                _this.updateFeatureLayer(_this.optionLayers.id8);
               });
+            } else if (_this.h6 == true && _this.h8 == false) {
+              esri.map.remove(huc8ws);
+              esri.mapImage.findSublayerById(2).visible = false;
+              esri.mapImage.findSublayerById(3).visible = true;
 
-              esri.mapView.goTo({ center: point, zoom: 11 });
-            });
+              query = huc8ws.createQuery(point);
+              query.geometry = point;
+              huc8ws.queryFeatures(query).then(function(result) {
+                let feature = result.features[0].attributes;
+                huc8 = {
+                  desc: 'HUC 8',
+                  name: feature.name,
+                  huc: feature.WHUC8,
+                };
+                _this.selectedHuc = feature.WHUC8;
+                _this.wetlandWatersheds.push(huc8);
+                _this.h8 = true;
+
+                esri.defExp = "WHUC8 = '" + _this.selectedHuc + "'";
+                _this.updateFeatureLayer(_this.optionLayers.id10);
+              });
+            } else if (_this.h8 == true && _this.h10 == false) {
+              esri.map.remove(huc10ws);
+              esri.mapImage.findSublayerById(3).visible = false;
+              esri.mapImage.findSublayerById(4).visible = true;
+
+              query = huc10ws.createQuery(point);
+              query.geometry = point;
+              huc10ws.queryFeatures(query).then(function(result) {
+                let feature = result.features[0].attributes;
+                huc10 = {
+                  desc: 'HUC 10',
+                  name: feature.name,
+                  huc: feature.WHUC10,
+                };
+                _this.selectedHuc = feature.WHUC10;
+                _this.wetlandWatersheds.push(huc10);
+                _this.h10 = true;
+                _this.h12 = true;
+
+                esri.defExp = "WHUC10 = '" + _this.selectedHuc + "'";
+                _this.updateFeatureLayer(_this.optionLayers.id12);
+              });
+            } else if (_this.h10 == true && _this.h12 == true) {
+              esri.mapImage.findSublayerById(3).visible = false;
+              esri.mapImage.findSublayerById(4).visible = true;
+
+              if (_this.wetlandWatersheds.length <= 3) {
+                esri.map.remove(huc12ws);
+
+                if (esri.featureLayer) {
+                  esri.featureLayer.destroy();
+                }
+
+                _this.showServices = false;
+                _this.showNumServices = true;
+
+                query = huc12ws.createQuery(point);
+                query.geometry = point;
+                huc12ws.queryFeatures(query).then(function(result) {
+                  console.log(result);
+                  let feature = result.features[0].attributes;
+
+                  huc12 = {
+                    desc: 'HUC 12',
+                    name: feature.name,
+                    huc: feature.WHUC12,
+                  };
+
+                  _this.selectedHuc = feature.WHUC12;
+
+                  esri.mapImage.findSublayerById(0).definitionExpression =
+                    "WHUC12 <> '" + _this.selectedHuc + "'";
+
+                  _this.wetlandWatersheds.push(huc12);
+
+                  _this.h12 = true;
+
+                  console.log('entered huc12 query');
+
+                  esri.mapImage.sublayers.forEach((layer) => {
+                    if (
+                      layer.title ==
+                      'Current Wetlands - ' + _this.serviceOption
+                    ) {
+                      _this.layerIndex = layer.id;
+                      esri.mapImage.findSublayerById(
+                        _this.layerIndex
+                      ).visible = true;
+                    }
+                  });
+
+                  esri.mapView.goTo({ center: point, zoom: 11 });
+
+                  esri.mapView.ui.add(esri.sketch, 'top-leading');
+                  _this.h6 = false;
+                  _this.h8 = false;
+                  _this.h10 = false;
+                  _this.h12 = false;
+                });
+              }
+            }
           }
-        }
+        });
       }
     });
 
@@ -2332,98 +2364,6 @@ export default {
       }
     });
 
-    // let highlight;
-
-    // _this.$watch('evalCircle', () => {
-    //   console.log('evalCircle watcher initiated');
-    //   if (_this.evalCircle === true) {
-    //     // let layerArray = [muk_srl, muk_fens, muk_lakes];
-    //     esri.mapView.on('pointer-move', (event) => {
-    //       const opts = {
-    //         include: muk_srl,
-    //         muk_fens,
-    //         muk_lakes,
-    //       };
-    //       esri.mapView.hitTest(event, opts).then((e) => {
-    //         if (e.results.length) {
-    //           console.log('we have results from the hittest');
-    //           const hitGraphic = e.results[0].graphic;
-    //           console.log(e.results);
-    //           console.log(hitGraphic);
-
-    //           const query = muk_lakes.createQuery();
-    //           const queryb = muk_srl.createQuery();
-    //           const queryc = muk_fens.createQuery();
-
-    //           let objectID = hitGraphic.attributes.OBJECTID;
-    //           query.where = 'OBJECTID = ' + objectID;
-    //           queryb.where = 'OBJECTID = ' + objectID;
-    //           queryc.where = 'OBJECTID = ' + objectID;
-
-    //           if (highlight) {
-    //             highlight.remove();
-    //           }
-    //           muk_lakes.queryFeatures(query).then((result) => {
-    //             const feature = result.features[0];
-    //             highlight = muk_lakesLayerView.highlight(
-    //               feature.attributes['OBJECTID']
-    //             );
-    //           });
-    //           muk_srl.queryFeatures(queryb).then((result) => {
-    //             const feature = result.features[0];
-    //             highlight = muk_srlLayerView.highlight(
-    //               feature.attributes['OBJECTID']
-    //             );
-    //           });
-    //           muk_fens.queryFeatures(queryc).then((result) => {
-    //             const feature = result.features[0];
-    //             highlight = muk_fensLayerView.highlight(
-    //               feature.attributes['OBJECTID']
-    //             );
-    //           });
-    //         }
-    //       });
-    //     });
-    //   }
-    // });
-
-    //code to add highlight feature for map image layer
-    // esri.mapView.popup.watch('selectedFeature', function(gra) {
-    //   if (gra) {
-    //     esri.mapView.graphics.removeAll();
-    //     var h = esri.mapView.highlightOptions;
-    //     gra.symbol = {
-    //       type: 'simple-fill', // autocasts as new SimpleFillSymbol()
-    //       color: [h.color.r, h.color.g, h.color.b, 0],
-    //       outline: {
-    //         // autocasts as new SimpleLineSymbol()
-    //         color: [h.color.r, h.color.g, h.color.b, h.color.a],
-    //         width: 1,
-    //       },
-    //     };
-    //     esri.mapView.graphics.add(gra);
-    //   } else {
-    //     esri.mapView.graphics.removeAll();
-    //   }
-    // });
-
-    // esri.mapView.popup.watch('visible', function(vis) {
-    //   if (!vis) {
-    //     esri.mapView.graphics.removeAll();
-    //   }
-    // });
-
-    //add supporting layers widget to map if true
-    // if (this.$store.state.config.supportingLayersOnMap) {
-    //   let supportingLayersExpand = new Expand({
-    //     expandIconClass: 'esri-icon-layer-list',
-    //     expandTooltip: 'Expand LayerList',
-    //     view: esri.mapView,
-    //     content: document.getElementById('supportingLayers'),
-    //   });
-    //   esri.mapView.ui.add(supportingLayersExpand, 'top-right');
-    // }
-
     //add scalebar widget
     let scaleBar = new ScaleBar({
       view: esri.mapView,
@@ -2441,6 +2381,22 @@ export default {
       position: 'top-right',
       index: 0,
     });
+
+    // sketch tools
+    esri.sketch = new Sketch({
+      layer: esri.graphicsLayer,
+      view: esri.mapView,
+      // graphic will be selected as soon as it is created
+      creationMode: 'update',
+      availableCreateTools: ['polygon'],
+    });
+    esri.sketch.visibleElements = {
+      selectionTools: {
+        'lasso-selection': false,
+        'rectangle-selection': false,
+      },
+      settingsMenu: false,
+    };
 
     // add measure tools
     esri.measurement = new Measurement({
@@ -2534,12 +2490,19 @@ export default {
           'https://cirrus.tnc.org/arcgis/rest/services/FN_Wisconsin/ScoringExplore_All_Final_addFeas/MapServer/' +
           id,
         outFields: ['*'],
+        opacity: 0.6,
       });
       esri.map.add(esri.featureLayer);
       esri.featureLayer.definitionExpression = esri.defExp;
       esri.featureLayer.queryExtent().then(function(results) {
         esri.mapView.goTo(results.extent);
       });
+
+      console.log(this.option);
+    },
+
+    serviceChange() {
+      console.log(this.option);
     },
 
     updateSupportingVisibility() {

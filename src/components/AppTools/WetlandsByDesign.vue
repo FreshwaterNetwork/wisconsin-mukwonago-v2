@@ -92,6 +92,7 @@
                     :val="option.value"
                     :label="option.label"
                     size="30px"
+                    @update:model-value="optionUpdate()"
                   />
                   <icon-button
                     v-if="option.visible === false"
@@ -187,10 +188,10 @@
               <div
                 v-for="guild in guildOptions"
                 :key="guild"
-                style="background: white;"
+                style="background-color: white;"
               >
                 <q-radio
-                  v-model="guild.value"
+                  v-model="this.guild"
                   :val="guild.value"
                   :label="guild.label"
                   size="30px"
@@ -213,18 +214,25 @@
                   {{ guild.description }}
                 </div>
               </div>
+              <q-btn
+                id="guild-button"
+                color="primary"
+                dense
+                label="Remove Guild Layer"
+                @click="this.noGuild()"
+              />
             </q-expansion-item>
-            <!-- <div style="max-width: 350px" v-if="this.hucHover == true">
-              <q-list dense bordered padding class="rounded-borders">
+            <!-- <div style="max-width: 350px" v-if="this.rangeOfService == true">
+              <q-list bordered padding class="rounded-borders" dense>
                 <q-item>
                   <q-item-section>
-                    Combined Services
+                    Combined Services:
                   </q-item-section>
                 </q-item>
-                <hr />
+
                 <q-item>
                   <q-item-section>
-                    Flood Abatement
+                    Flood Abatement:
                   </q-item-section>
                 </q-item>
 
@@ -252,9 +260,6 @@
                   </q-item-section>
                 </q-item>
               </q-list>
-            </div> -->
-            <!-- <div v-if="rangeOfService == true">
-
             </div> -->
           </div>
         </div>
@@ -297,34 +302,39 @@ export default {
           label: 'All Guilds',
           value: 'All Guilds',
           visible: false,
+          id: 52,
           description:
             'A wildlife guild is a group of species that use the same or similar habitats and resources. Some wetlands, and associated uplands, can support multiple guilds.',
         },
         {
           label: 'Forest Interior Guild',
-          value: 'Forest Interior Guild',
+          value: 'Forest Interior Birds Guild',
           visible: false,
+          id: 48,
           description:
             'The Forest Interior Guild includes species that require forested wetlands embedded within heavily forested landscapes. Black-and-white warbler, northern waterthrush, and northern flying squirrels are examples.',
         },
         {
           label: 'Shrub Swamp Guild',
-          value: 'Shrub Swamp Guild',
+          value: 'Wet Shrub Birds Guild',
           visible: false,
+          id: 51,
           description:
             'The Shrub Swamp Guild includes species that depend on dense thickets over wet soils that usually flood in spring, such as willow and alder flycatchers.',
         },
         {
           label: 'Shallow Marsh Guild',
-          value: 'Shallow Marsh Guild',
+          value: 'Shallow Marsh Birds Guild',
           visible: false,
+          id: 50,
           description:
             'The Shallow Marsh Guild includes species that use open canopy wetlands with shallow water, or that are saturated most of the year, and may use adjacent open canopy uplands for breeding or foraging. These include American bittern, blue-winged teal, amphibians and aquatic invertebrates.',
         },
         {
-          label: 'Open Waters GUild',
-          value: 'Open Waters GUild',
+          label: 'Open Waters Guild',
+          value: 'Open Water Birds Guild',
           visible: false,
+          id: 49,
           description:
             'The Open Waters Guild includes species that prefer large areas of open water, or where water is deeper and lasts longer than in a shallow marsh. Terns and diving ducks are examples.',
         },
@@ -332,6 +342,7 @@ export default {
           label: 'All-Guild Restoration Opportunities',
           value: 'All-Guild Restoration Opportunities',
           visible: false,
+          id: 53,
           description:
             'Restorable wetlands may have the potential to provide habitat for multiple guilds, depending on the habitat type restored and its proximity to core guild habitat.',
         },
@@ -341,6 +352,9 @@ export default {
           label: 'Combined Services',
           value: 'Combined Services',
           visible: false,
+          id8: 30,
+          id10: 31,
+          id12: 32,
           description:
             'Wetlands can provide multiple services. Each wetland’s characteristics determine which services that wetland provides and to what extent. Some watersheds have lost more services than others, due to historical wetland loss and alteration.',
         },
@@ -348,6 +362,9 @@ export default {
           label: 'Sediment Retention',
           value: 'Sediment Retention',
           visible: false,
+          id8: 42,
+          id10: 43,
+          id12: 44,
           description:
             'Wetlands retain some sediment that would otherwise move downstream. Excess sediment in streams impairs water quality and aquatic habitat.',
         },
@@ -355,6 +372,9 @@ export default {
           label: 'Flood Abatement',
           value: 'Flood Abatement',
           visible: false,
+          id8: 33,
+          id10: 34,
+          id12: 35,
           description:
             'After heavy rainfall, many wetlands detain storm water runoff and overbank flooding from rivers, which slows the flow of excess water downstream.',
         },
@@ -362,6 +382,9 @@ export default {
           label: 'Fish and Aquatic Habitat',
           value: 'Fish and Aquatic Habitat',
           visible: false,
+          id8: 36,
+          id10: 37,
+          id12: 38,
           description:
             'Wetlands support some part of the full life cycle for most fish and aquatic life.',
         },
@@ -369,6 +392,9 @@ export default {
           label: 'Nutrient Transformation',
           value: 'Nutrient Transformation',
           visible: false,
+          id8: 39,
+          id10: 40,
+          id12: 41,
           description:
             'Wetlands remove nutrients from the water and convert them into plants, soil, or harmless gas.',
         },
@@ -376,6 +402,9 @@ export default {
           label: 'Surface Water Supply',
           value: 'Surface Water Supply',
           visible: false,
+          id8: 45,
+          id10: 46,
+          id12: 47,
           description:
             'Wetlands often contribute water to streams and rivers, especially during dry periods.',
         },
@@ -387,6 +416,7 @@ export default {
           description:
             'Current and potentially restorable wetlands often have the potential to provide more than one service at “high” or “very high” levels.',
           visible: false,
+          id: 16,
         },
         {
           label: 'Flood Abatement',
@@ -394,6 +424,7 @@ export default {
           description:
             'After heavy rainfall, many wetlands detain storm water runoff and overbank flooding from rivers, which slows the flow of excess water downstream.',
           visible: false,
+          id: 17,
         },
         {
           label: 'Fish and Aquatic Habitat',
@@ -401,13 +432,15 @@ export default {
           description:
             'Wetlands support some part of the full life cycle for most fish and aquatic life.',
           visible: false,
+          id: 18,
         },
         {
-          label: 'Phosphorus Retention',
-          value: 'Phosphorus Retention',
+          label: 'Phosphorous Retention',
+          value: 'Phosphorous Retention',
           description:
             'Wetlands can intercept phosphorus from water and sediments, and store it in plants and soils.',
           visible: false,
+          id: 19,
         },
         {
           label: 'Sediment Retention',
@@ -415,6 +448,7 @@ export default {
           description:
             'Wetlands retain some sediment that would otherwise move downstream. Excess sediment in streams impairs water quality and aquatic habitat.',
           visible: false,
+          id: 20,
         },
         {
           label: 'Nitrogen Reduction',
@@ -422,6 +456,7 @@ export default {
           description:
             'Wetlands remove nitrate from the water and convert it into plants, soil, or harmless gas.',
           visible: false,
+          id: 21,
         },
         {
           label: 'Surface Water Supply',
@@ -429,6 +464,7 @@ export default {
           description:
             'Many wetlands contribute water to streams and rivers, especially during dry periods.',
           visible: false,
+          id: 25,
         },
         {
           label: 'Shoreline Protection',
@@ -436,6 +472,7 @@ export default {
           description:
             'Wetlands reduce wave energy in lakes and slow flows in rivers, protecting banks and shorelines from erosion.',
           visible: false,
+          id: 22,
         },
         {
           label: 'Carbon Storage',
@@ -443,6 +480,7 @@ export default {
           description:
             'Wetlands capture carbon dioxide, a greenhouse gas, and store carbon in vegetation and deep organic soils.',
           visible: false,
+          id: 23,
         },
         {
           label: 'Floristic Integrity',
@@ -450,6 +488,7 @@ export default {
           description:
             'Some wetlands are of high condition, containing a healthy array of plant species.',
           visible: false,
+          id: 24,
         },
       ],
       rfOptions: [
@@ -459,6 +498,7 @@ export default {
           description:
             'Potentially restorable wetlands (PRWs) are ranked for restoration feasibility based on land use and susceptibility to invasive plants. PRWs are also ranked based on these categories, individually (see below). This information helps to distinguish which PRWs have fewer obstacles to restoration and merit further assessment at the site level. None of the feasibility factors preclude wetland restoration.',
           visible: false,
+          id: 54,
         },
         {
           label: 'Land Use Considerations',
@@ -466,6 +506,7 @@ export default {
           description:
             'Land use and land cover factors affect restoration feasibility. Agricultural lands are the most feasible due to the general absence of structures. Proximity to urban areas reduces feasibility, varying by intensity of development. Due to regulations, proximity to airports is a consideration, but not an absolute barrier. Sites within drainage districts are considered not feasible for restoration.',
           visible: false,
+          id: 55,
         },
         {
           label: 'Invasive Species Considerations',
@@ -473,6 +514,7 @@ export default {
           description:
             'The presence of invasive plants, or proximity to an invasive plant seed source, reduces the habitat quality of wetland restorations and may increase long-term management needs. Four common invaders are considered: reed canary grass, Phragmites, cattails, and invasive shrubs (buckthorn or honeysuckle).',
           visible: false,
+          id: 56,
         },
       ],
       huc6: '',
@@ -569,8 +611,108 @@ export default {
     hucHover() {
       return this.$store.state.hucHover;
     },
+    rangeOfService() {
+      return this.$store.state.rangeOfService;
+    },
+    optionLayers: {
+      get() {
+        return this.$store.state.optionLayers;
+      },
+      set(value) {
+        this.$store.commit('updateOptionLayers', value);
+      },
+    },
+    rfLayer: {
+      get() {
+        return this.$store.state.rfLayer;
+      },
+      set(value) {
+        this.$store.commit('updateRfLayer', value);
+      },
+    },
+    serviceLayer: {
+      get() {
+        return this.$store.state.serviceLayer;
+      },
+      set(value) {
+        this.$store.commit('updateServiceLayer', value);
+      },
+    },
+    guild: {
+      get() {
+        return this.$store.state.guild;
+      },
+      set(value) {
+        this.$store.commit('updateGuild', value);
+      },
+    },
+    guildLayer: {
+      get() {
+        return this.$store.state.guildLayer;
+      },
+      set(value) {
+        this.$store.commit('updateGuildLayer', value);
+      },
+    },
+    removeGuild: {
+      get() {
+        return this.$store.state.removeGuild;
+      },
+      set(value) {
+        this.$store.commit('updateRemoveGuild', value);
+      },
+    },
   },
-  watch: {},
+  methods: {
+    noGuild() {
+      this.guild = '';
+      this.removeGuild = true;
+    },
+    optionUpdate() {
+      this.optionLayers = {};
+
+      this.options.forEach((option) => {
+        if (option.label == this.option) {
+          this.optionLayers = {
+            id8: option.id8,
+            id10: option.id10,
+            id12: option.id12,
+          };
+        }
+      });
+    },
+  },
+  watch: {
+    rfOption() {
+      this.rfLayer = 0;
+
+      this.rfOptions.forEach((option) => {
+        if (option.label === this.rfOption) {
+          this.rfLayer = option.id;
+        }
+      });
+    },
+    serviceOption() {
+      this.serviceLayer = 0;
+
+      this.serviceOptions.forEach((option) => {
+        if (option.label == this.serviceOption) {
+          this.serviceLayer = option.id;
+        }
+      });
+    },
+    guild() {
+      this.guildOptions.forEach((option) => {
+        console.log(option.value);
+        console.log(this.guild);
+        if (option.value == this.guild) {
+          this.guildLayer = option.id;
+        }
+      });
+
+      console.log(this.guildLayer);
+    },
+  },
 };
 </script>
 
@@ -582,10 +724,6 @@ export default {
   padding: 5px;
   margin-left: 25px;
 }
-/* .new-option {
-  columns: 2;
-  background-color: white;
-} */
 #print-header {
   position: absolute;
   top: 0px;
@@ -600,5 +738,10 @@ export default {
   position: absolute;
   top: 30px;
   height: 500px;
+}
+#guild-button {
+  margin: auto;
+  width: fit-content;
+  display: block;
 }
 </style>

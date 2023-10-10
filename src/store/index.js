@@ -52,7 +52,7 @@ export default createStore({
     hideControls: true,
     mapPrintURI: '',
     planType: '',
-    agreed: true,
+    agreed: false,
     selectedFeatures: [],
     locationValue: '',
     removeHighlight: false,
@@ -75,7 +75,14 @@ export default createStore({
     serviceOption: 'Count of Services ≥ High',
     rfOption: 'Overall Feasibility',
     option: 'Combined Services',
+    guild: '',
+    guildLayer: 0,
     hucHover: false,
+    rangeOfService: false,
+    optionLayers: { id8: 30, id10: 31, id12: 32 },
+    rfLayer: 54,
+    serviceLayer: 16,
+    removeGuild: false,
   },
   mutations: {
     //data retrieved from web services
@@ -182,6 +189,27 @@ export default createStore({
     },
     updateHucHover(state, val) {
       state.hucHover = val;
+    },
+    updateRangeOfService(state, val) {
+      state.rangeOfService = val;
+    },
+    updateOptionLayers(state, val) {
+      state.optionLayers = val;
+    },
+    updateRfLayer(state, val) {
+      state.rfLayer = val;
+    },
+    updateServiceLayer(state, val) {
+      state.serviceLayer = val;
+    },
+    updateGuild(state, val) {
+      state.guild = val;
+    },
+    updateGuildLayer(state, val) {
+      state.guildLayer = val;
+    },
+    updateRemoveGuild(state, val) {
+      state.removeGuild = val;
     },
   },
 
