@@ -2,14 +2,14 @@
   <div>
     <div class="text-h6 text-weight-medium text-center">
       <span>Wetlands and Watersheds Explorer</span>
-      <q-btn
+      <!-- <q-btn
         icon="fas fa-bars"
         color="primary"
         padding="5px"
         class="q-mr-md"
         style="margin: 0px 10px 0px 10px;"
-      >
-        <q-menu anchor="top right" self="top left">
+      > -->
+      <!-- <q-menu anchor="top right" self="top left">
           <q-list dense>
             <q-item clickable v-close-popup>
               <q-item-section>Bookmark and Share</q-item-section>
@@ -18,8 +18,29 @@
               <q-item-section>Download Data</q-item-section>
             </q-item>
           </q-list>
-        </q-menu>
-      </q-btn>
+        </q-menu> -->
+      <!-- </q-btn> -->
+      <icon-button
+        v-if="this.appInfo === false"
+        type="info"
+        method="show-info"
+        @show-info="this.appInfo = !this.appInfo"
+        style="margin-left: 5px; width: 20px; height: 20px;"
+      ></icon-button>
+      <icon-button
+        v-if="this.appInfo === true"
+        type="close"
+        method="hide-info"
+        @hide-info="this.appInfo = !this.appInfo"
+        style="margin-left: 5px; width: 20px; height: 20px;"
+      ></icon-button>
+      <p v-if="this.appInfo == true">
+        <a
+          href="https://maps.freshwaternetwork.org/wisconsin/plugins/wetlands-watershed-explorer/assets/WetlandsByDesign_FinalReport.pdf"
+          target="_blank"
+          >View Report</a
+        >
+      </p>
     </div>
     <hr />
     <div class="text-body1 q-pa-sm">
@@ -222,45 +243,155 @@
                 @click="this.noGuild()"
               />
             </q-expansion-item>
-            <!-- <div style="max-width: 350px" v-if="this.rangeOfService == true">
-              <q-list bordered padding class="rounded-borders" dense>
-                <q-item>
-                  <q-item-section>
-                    Combined Services:
-                  </q-item-section>
-                </q-item>
+            <q-expansion-item
+              v-if="this.rangeOfService == true"
+              label="Range of Services:"
+              style="background: rgb(237 237 237)"
+              default-opened
+              dense
+            >
+              <div
+                style="padding-left: 15px; background-color: white; padding-top: 10px"
+                v-if="this.serviceType == 'nos'"
+              >
+                <div
+                  style="margin: auto; width: max-content; display: block; padding-bottom: 10px"
+                >
+                  Wetland ID: <strong>{{ this.wetlandId }}</strong>
+                  <br />
+                  Wetland Area: <strong>{{ this.watershedAcres }} acres</strong>
+                </div>
 
-                <q-item>
-                  <q-item-section>
-                    Flood Abatement:
-                  </q-item-section>
-                </q-item>
+                <p v-if="this.countOfServices != 0">
+                  Count of Services ≥ High:
+                  <strong>{{ this.countOfServices }}</strong>
+                </p>
 
-                <q-item>
-                  <q-item-section>
-                    Fish and Aquatic Habitat
-                  </q-item-section>
-                </q-item>
+                <p v-if="this.floodAbatement != 0">
+                  Flood Abatement: <strong> {{ this.floodAbatement }}</strong>
+                </p>
 
-                <q-item>
-                  <q-item-section>
-                    Sediment Retention
-                  </q-item-section>
-                </q-item>
+                <p v-if="this.fishAquaticHabitat != 0">
+                  Fish and Aquatic Habitat:
+                  <strong> {{ this.fishAquaticHabitat }}</strong>
+                </p>
 
-                <q-item>
-                  <q-item-section>
-                    Nutrient Transformation
-                  </q-item-section>
-                </q-item>
+                <p v-if="this.phosphorousRetention != 0">
+                  Phosphorous Retention:
+                  <strong> {{ this.phosphorousRetention }}</strong>
+                </p>
 
-                <q-item>
-                  <q-item-section>
-                    Surface Water Supply
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </div> -->
+                <p v-if="this.sedimentRetention != 0">
+                  Sediment Retention:
+                  <strong> {{ this.sedimentRetention }}</strong>
+                </p>
+
+                <p v-if="this.nitrogenReduction != 0">
+                  Nitrogen Reduction:
+                  <strong> {{ this.nitrogenReduction }}</strong>
+                </p>
+
+                <p v-if="this.surfaceWaterSupply != 0">
+                  Surface Water Supply:
+                  <strong> {{ this.surfaceWaterSupply }}</strong>
+                </p>
+
+                <p v-if="this.shorelineProtection != 0">
+                  Shoreline Protection:
+                  <strong> {{ this.shorelineProtection }}</strong>
+                </p>
+
+                <p v-if="this.carbonStorage != 0">
+                  Carbon Storage: <strong> {{ this.carbonStorage }}</strong>
+                </p>
+
+                <p v-if="this.floristicIntegrity != 0">
+                  Floristic Integrity:
+                  <strong> {{ this.floristicIntegrity }}</strong>
+                </p>
+              </div>
+              <div
+                v-if="this.serviceType == 'rf'"
+                style="padding-left: 15px; background-color: white; padding-top: 10px"
+              >
+                <div
+                  style="margin: auto; width: max-content; display: block; padding-bottom: 10px"
+                >
+                  Wetland ID: <strong>{{ this.wetlandId }}</strong>
+                  <br />
+                  Wetland Area: <strong>{{ this.watershedAcres }} acres</strong>
+                </div>
+
+                <div>
+                  <q-circular-progress
+                    v-if="
+                      this.loadingRf == true && this.loadingComplete == false
+                    "
+                    indeterminate
+                    rounded
+                    size="50px"
+                    color="black"
+                    style="margin: auto; width: max-contents; display: block"
+                  />
+                </div>
+
+                <div
+                  v-if="this.loadingComplete == true && this.loadingRf == false"
+                >
+                  <div v-if="this.overallFeas">
+                    Overall Feasibility:
+                    <div
+                      v-if="this.overallFeas <= -1"
+                      id="overall-feas-negative"
+                    ></div>
+                    <div
+                      v-if="this.overallFeas == 0"
+                      id="overall-feas-zero"
+                    ></div>
+                    <div
+                      v-if="this.overallFeas == 1"
+                      id="overall-feas-one"
+                    ></div>
+                    <div
+                      v-if="this.overallFeas == 2"
+                      id="overall-feas-two"
+                    ></div>
+                    <div
+                      v-if="this.overallFeas >= 3"
+                      id="overall-feas-three"
+                    ></div>
+                  </div>
+
+                  <div v-if="this.landUseCons">
+                    Land Use Considerations:
+                    <div id="land-less-one" v-if="this.landUseCons < 1"></div>
+                    <div id="land-one" v-if="this.landUseCons == 1"></div>
+                    <div id="land-two" v-if="this.landUseCons == 2"></div>
+                    <div id="land-more-two" v-if="this.landUseCons > 2"></div>
+                  </div>
+
+                  <div v-if="this.invasiveSpeciesCons">
+                    Invasive Species Considerations:
+                    <div
+                      id="invasive-less-two"
+                      v-if="this.invasiveSpeciesCons < -2"
+                    ></div>
+                    <div
+                      id="invasive-two"
+                      v-if="this.invasiveSpeciesCons == -2"
+                    ></div>
+                    <div
+                      id="invasive-one"
+                      v-if="this.invasiveSpeciesCons == -1"
+                    ></div>
+                    <div
+                      id="invasive-more-zero"
+                      v-if="this.invasiveSpeciesCons > 0"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </q-expansion-item>
           </div>
         </div>
       </div>
@@ -416,7 +547,8 @@ export default {
           description:
             'Current and potentially restorable wetlands often have the potential to provide more than one service at “high” or “very high” levels.',
           visible: false,
-          id: 16,
+          rfId: 16,
+          nosId: 6,
         },
         {
           label: 'Flood Abatement',
@@ -424,7 +556,8 @@ export default {
           description:
             'After heavy rainfall, many wetlands detain storm water runoff and overbank flooding from rivers, which slows the flow of excess water downstream.',
           visible: false,
-          id: 17,
+          rfId: 17,
+          nosId: 7,
         },
         {
           label: 'Fish and Aquatic Habitat',
@@ -432,7 +565,8 @@ export default {
           description:
             'Wetlands support some part of the full life cycle for most fish and aquatic life.',
           visible: false,
-          id: 18,
+          rfId: 18,
+          nosId: 8,
         },
         {
           label: 'Phosphorous Retention',
@@ -440,7 +574,8 @@ export default {
           description:
             'Wetlands can intercept phosphorus from water and sediments, and store it in plants and soils.',
           visible: false,
-          id: 19,
+          rfId: 19,
+          nosId: 9,
         },
         {
           label: 'Sediment Retention',
@@ -448,7 +583,8 @@ export default {
           description:
             'Wetlands retain some sediment that would otherwise move downstream. Excess sediment in streams impairs water quality and aquatic habitat.',
           visible: false,
-          id: 20,
+          rfId: 20,
+          nosId: 10,
         },
         {
           label: 'Nitrogen Reduction',
@@ -456,7 +592,8 @@ export default {
           description:
             'Wetlands remove nitrate from the water and convert it into plants, soil, or harmless gas.',
           visible: false,
-          id: 21,
+          rfId: 21,
+          nosId: 11,
         },
         {
           label: 'Surface Water Supply',
@@ -464,7 +601,8 @@ export default {
           description:
             'Many wetlands contribute water to streams and rivers, especially during dry periods.',
           visible: false,
-          id: 25,
+          rfId: 25,
+          nosId: 15,
         },
         {
           label: 'Shoreline Protection',
@@ -472,7 +610,8 @@ export default {
           description:
             'Wetlands reduce wave energy in lakes and slow flows in rivers, protecting banks and shorelines from erosion.',
           visible: false,
-          id: 22,
+          rfId: 22,
+          nosId: 12,
         },
         {
           label: 'Carbon Storage',
@@ -480,7 +619,8 @@ export default {
           description:
             'Wetlands capture carbon dioxide, a greenhouse gas, and store carbon in vegetation and deep organic soils.',
           visible: false,
-          id: 23,
+          rfId: 23,
+          nosId: 13,
         },
         {
           label: 'Floristic Integrity',
@@ -488,7 +628,8 @@ export default {
           description:
             'Some wetlands are of high condition, containing a healthy array of plant species.',
           visible: false,
-          id: 24,
+          rfId: 24,
+          nosId: 14,
         },
       ],
       rfOptions: [
@@ -522,6 +663,7 @@ export default {
       huc10: '',
       huc12: '',
       wsLength: '',
+      appInfo: false,
     };
   },
   computed: {
@@ -662,6 +804,150 @@ export default {
         this.$store.commit('updateRemoveGuild', value);
       },
     },
+    watershedRange: {
+      get() {
+        return this.$store.state.watershedRange;
+      },
+      set(value) {
+        this.$store.commit('updateWatershedRange', value);
+      },
+    },
+    countOfServices: {
+      get() {
+        return this.$store.state.countOfServices;
+      },
+      set(value) {
+        this.$store.commit('updateCountOfServices', value);
+      },
+    },
+    floodAbatement: {
+      get() {
+        return this.$store.state.floodAbatement;
+      },
+      set(value) {
+        this.$store.commit('updateFloodAbatement', value);
+      },
+    },
+    fishAquaticHabitat: {
+      get() {
+        return this.$store.state.fishAquaticHabitat;
+      },
+      set(value) {
+        this.$store.commit('updateFishAquaticHabitat', value);
+      },
+    },
+    phosphorousRetention: {
+      get() {
+        return this.$store.state.phosphorousRetention;
+      },
+      set(value) {
+        this.$store.commit('updatePhosphorousRetention', value);
+      },
+    },
+    sedimentRetention: {
+      get() {
+        return this.$store.state.sedimentRetention;
+      },
+      set(value) {
+        this.$store.commit('updateSedimentRetention', value);
+      },
+    },
+    nitrogenReduction: {
+      get() {
+        return this.$store.state.nitrogenReduction;
+      },
+      set(value) {
+        this.$store.commit('updateNitrogenReduction', value);
+      },
+    },
+    surfaceWaterSupply: {
+      get() {
+        return this.$store.state.surfaceWaterSupply;
+      },
+      set(value) {
+        this.$store.commit('updateSurfaceWaterSupply', value);
+      },
+    },
+    shorelineProtection: {
+      get() {
+        return this.$store.state.shorelineProtection;
+      },
+      set(value) {
+        this.$store.commit('updateShorelineProtection', value);
+      },
+    },
+    carbonStorage: {
+      get() {
+        return this.$store.state.carbonStorage;
+      },
+      set(value) {
+        this.$store.commit('updateCarbonStorage', value);
+      },
+    },
+    floristicIntegrity: {
+      get() {
+        return this.$store.state.floristicIntegrity;
+      },
+      set(value) {
+        this.$store.commit('updateFloristicIntegrity', value);
+      },
+    },
+    watershedAcres: {
+      get() {
+        return this.$store.state.watershedAcres;
+      },
+      set(value) {
+        this.$store.commit('updateWatershedAcres', value);
+      },
+    },
+    wetlandId: {
+      get() {
+        return this.$store.state.wetlandId;
+      },
+      set(value) {
+        this.$store.commit('updateWetlandId', value);
+      },
+    },
+    overallFeas: {
+      get() {
+        return this.$store.state.overallFeas;
+      },
+      set(value) {
+        this.$store.commit('updateOverallFeas', value);
+      },
+    },
+    landUseCons: {
+      get() {
+        return this.$store.state.landUseCons;
+      },
+      set(value) {
+        this.$store.commit('updateLandUseCons', value);
+      },
+    },
+    invasiveSpeciesCons: {
+      get() {
+        return this.$store.state.invasiveSpeciesCons;
+      },
+      set(value) {
+        this.$store.commit('updateinvasiveSpeciesCons', value);
+      },
+    },
+    loadingRf: {
+      get() {
+        return this.$store.state.loadingRf;
+      },
+      set(value) {
+        this.$store.commit('updateLoadingRf', value);
+      },
+    },
+    loadingComplete: {
+      get() {
+        return this.$store.state.loadingComplete;
+      },
+      set(value) {
+        this.$store.commit('updateLoadingComplete', value);
+      },
+    },
   },
   methods: {
     noGuild() {
@@ -685,6 +971,12 @@ export default {
   watch: {
     rfOption() {
       this.rfLayer = 0;
+      // this.overallFeas = 0;
+      // this.landUseCons = 0;
+      // this.invasiveSpeciesCons = 0;
+
+      this.wetlandIdString = '';
+      this.watershedAcres = 0;
 
       this.rfOptions.forEach((option) => {
         if (option.label === this.rfOption) {
@@ -697,7 +989,11 @@ export default {
 
       this.serviceOptions.forEach((option) => {
         if (option.label == this.serviceOption) {
-          this.serviceLayer = option.id;
+          if (this.serviceType === 'nos') {
+            this.serviceLayer = option.nosId;
+          } else if (this.serviceType === 'rf') {
+            this.serviceLayer = option.rfId;
+          }
         }
       });
     },
@@ -743,5 +1039,109 @@ export default {
   margin: auto;
   width: fit-content;
   display: block;
+}
+#overall-feas-negative {
+  display: inline-block;
+  background-color: rgb(254, 229, 217);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#overall-feas-zero {
+  display: inline-block;
+  background-color: rgb(252, 174, 145);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#overall-feas-one {
+  display: inline-block;
+  background-color: rgb(251, 106, 74);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#overall-feas-two {
+  display: inline-block;
+  background-color: rgb(222, 45, 38) !important;
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#overall-feas-three {
+  display: inline-block;
+  background-color: rgb(165, 15, 21);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#land-less-one {
+  display: inline-block;
+  background-color: rgb(254, 229, 217);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#land-one {
+  display: inline-block;
+  background-color: rgb(252, 174, 145);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#land-two {
+  display: inline-block;
+  background-color: rgb(251, 106, 74);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#land-more-two {
+  display: inline-block;
+  background-color: rgb(203, 24, 29);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#invasive-less-two {
+  display: inline-block;
+  background-color: rgb(254, 229, 217);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#invasive-two {
+  display: inline-block;
+  background-color: rgb(252, 174, 145);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#invasive-one {
+  display: inline-block;
+  background-color: rgb(251, 106, 74);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#invasive-more-zero {
+  display: inline-block;
+  background-color: rgb(203, 24, 29);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
 }
 </style>
