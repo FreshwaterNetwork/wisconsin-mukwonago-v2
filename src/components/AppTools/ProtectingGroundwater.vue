@@ -1,4 +1,5 @@
 <template>
+  <!-- {{ agreed }} -->
   <div>
     <div class="text-h6 text-weight-medium text-center">
       <span>Protecting Groundwater Dependent Ecosystems</span>
@@ -51,14 +52,14 @@
             :color="planType === 'evaluate' ? 'primary' : 'white'"
             label="Evaluate a Planned Pumping Site"
             :text-color="planType === 'evaluate' ? 'white' : 'black'"
-            to="/tab3/evaluate"
+            to="/protecting-groundwater/evaluate"
             @click="planType = 'evaluate'"
           />
           <q-btn
             :color="planType === 'search' ? 'primary' : 'white'"
             label="Search for a Pumping Site"
             :text-color="planType === 'search' ? 'white' : 'black'"
-            to="/tab3/search"
+            to="/protecting-groundwater/search"
             @click="planType = 'search'"
           />
         </q-btn-group>
@@ -70,7 +71,7 @@
 
 <script>
 export default {
-  name: 'tab3',
+  name: 'protecting-groundwater',
   computed: {
     planType: {
       get() {

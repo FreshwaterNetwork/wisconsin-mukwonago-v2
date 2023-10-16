@@ -24,8 +24,7 @@
         <q-btn
           color="primary"
           label="Open Application"
-          :to="app.tab == '2' ? { name: 'tab2' } : { name: 'tab3' }"
-          :disable="app.tab == '2' ? true : false"
+          @click="this.setApp(app)"
         ></q-btn>
       </div>
     </div>
@@ -34,16 +33,17 @@
 
 <script>
 export default {
-  name: 'tab1',
+  name: 'Home',
   components: {},
   data() {
     return {
       appOptions: [
         {
-          name: 'Coming Soon - Wetlands by Design: A Watershed Approach',
+          name: 'Wetlands by Design: A Watershed Approach',
           description:
             'Wetlands can improve water quality, reduce flood impacts, help streams flow, provide habitat, and offer many other services. But not all wetlands provide the same services to the same degree! To find the best sites to restore and protect—and the most promising watersheds to work in—check out the Wetlands and Watersheds Explorer.',
           tab: '2',
+          id: 1,
         },
         {
           name:
@@ -51,9 +51,30 @@ export default {
           description:
             'Groundwater dependent ecosystems (gde) are systems that depend on groundwater inputs to support their natural flora and fauna. These ecosystems can occur in wetlands, lakes and rivers. One rare gde is the fen, a wetland that depend mostly on groundwater inputs rather than surface water flows to support the wetland. The Mukwonago River Basin in southeast Wisconsin has several remaining fens that need careful protection. This tool is designed to help site high capacity groundwater wells in areas of the basin that protect a select group of important groundwater dependent ecosystems – fens, rivers and lakes – in the watershed. Impacts are reported in the drawdown experienced in fens or the depletion potential in rivers and lakes. The results presented are based off a groundwater model developed by the USGS, model documentation can be found here.',
           tab: '3',
+          id: 2,
         },
       ],
     };
+  },
+  computed: {
+    wbdApp: {
+      get() {
+        return this.$store.state.wbdApp;
+      },
+      set(value) {
+        this.$store.commit('updateWbdApp', value);
+      },
+    },
+  },
+  methods: {
+    setApp(val) {
+      if (val.id == 1) {
+        this.$router.push('/wetlands-by-design');
+      }
+      if (val.id == 2) {
+        this.$router.push('/protecting-groundwater');
+      }
+    },
   },
 };
 </script>

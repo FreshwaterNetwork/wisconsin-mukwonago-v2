@@ -1,7 +1,7 @@
 <template>
   <div class="q-pt-none">
     <q-splitter
-      style="overflow:hidden;"
+      style="overflow: hidden"
       v-model="splitterModel"
       unit="px"
       :limits="[55, 130]"
@@ -24,45 +24,48 @@
           <q-separator></q-separator>
           <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
-            style="padding:10px; height: 31.5vh;"
-            to="/tab1"
-            name="tab1"
+            style="padding: 10px; height: 31.5vh"
+            to="/get-started"
+            name="get-started"
           >
             <q-icon name="fas fa-info" size="sm" />
             Get <br />Started
           </q-route-tab>
           <q-route-tab
             v-if="$store.state.condensedTabs || smallScreen"
-            style="padding:10px;"
-            to="/tab1"
-            name="tab1"
+            style="padding: 10px"
+            to="/get-started"
+            name="get-started"
           >
             <q-icon name="fas fa-info" size="lg"></q-icon>
           </q-route-tab>
           <q-separator></q-separator>
-          <!-- <q-route-tab
+          <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
-            style="padding:10px; height: 31.5vh;"
-            to="/tab2"
-            name="tab2"
+            style="padding: 10px; height: 31.5vh"
+            to="/wetlands-by-design"
+            name="wetlands-by-design"
+            @click="this.wbdApp = true"
           >
             <q-icon name="fas fa-water" size="sm"></q-icon>
             Wetlands <br />By Design
           </q-route-tab>
           <q-route-tab
             v-if="$store.state.condensedTabs || smallScreen"
-            style="padding:10px;"
-            to="/tab2"
-            name="tab2"
+            style="padding: 10px"
+            to="/wetlands-by-design"
+            name="wetlands-by-design"
+            @click="this.wbdApp = true"
           >
             <q-icon name="fas fa-water" size="lg"></q-icon>
           </q-route-tab>
-          <q-separator></q-separator> -->
+          <q-separator></q-separator>
           <q-route-tab
             v-if="!$store.state.condensedTabs && !smallScreen"
-            style="padding:10px; height: 31.5vh;"
-            to="/tab3"
-            name="tab3"
+            style="padding: 10px; height: 31.5vh"
+            to="/protecting-groundwater"
+            name="protecting-groundwater"
+            @click="this.wbdApp = false"
           >
             <q-icon name="fas fa-hand-holding-water" size="sm"></q-icon>
             Protecting <br />
@@ -72,9 +75,10 @@
           >
           <q-route-tab
             v-if="$store.state.condensedTabs || smallScreen"
-            style="padding:10px;"
-            to="/tab3"
-            name="tab3"
+            style="padding: 10px"
+            to="/protecting-groundwater"
+            name="protecting-groundwater"
+            @click="this.wbdApp = false"
           >
             <q-icon name="fa fa-hand-holding-water" size="lg"></q-icon>
           </q-route-tab>
@@ -84,38 +88,51 @@
 
       <template v-slot:after>
         <q-tab-panels v-model="tab" animated vertical keep-alive>
-          <q-tab-panel name="tab1" class="q-pr-none q-pl-lg q-pt-lg q-pb-lg">
+          <q-tab-panel
+            name="get-started"
+            class="q-pr-none q-pl-lg q-pt-lg q-pb-lg"
+          >
             <q-scroll-area
               id=""
               class="panel panelM"
               :thumb-style="{ width: '7px' }"
             >
               <div class="q-mr-lg">
-                <keep-alive><tab1></tab1></keep-alive>
+                <keep-alive><get-started></get-started></keep-alive>
               </div>
             </q-scroll-area>
           </q-tab-panel>
 
-          <q-tab-panel name="tab2" class="q-pr-none q-pl-lg q-pt-lg q-pb-lg">
+          <q-tab-panel
+            name="wetlands-by-design"
+            class="q-pr-none q-pl-lg q-pt-lg q-pb-lg"
+          >
             <q-scroll-area
               id=""
               class="panel panelM"
               :thumb-style="{ width: '7px' }"
             >
               <div class="q-mr-lg">
-                <keep-alive><tab2></tab2></keep-alive>
+                <keep-alive
+                  ><wetlands-by-design></wetlands-by-design
+                ></keep-alive>
               </div>
             </q-scroll-area>
           </q-tab-panel>
 
-          <q-tab-panel name="tab3" class="q-pr-none q-pl-lg q-pt-lg q-pb-lg">
+          <q-tab-panel
+            name="protecting-groundwater"
+            class="q-pr-none q-pl-lg q-pt-lg q-pb-lg"
+          >
             <q-scroll-area
               id=""
               class="panel panelM"
               :thumb-style="{ width: '7px' }"
             >
               <div class="q-mr-lg">
-                <keep-alive><tab3></tab3></keep-alive>
+                <keep-alive
+                  ><protecting-groundwater></protecting-groundwater
+                ></keep-alive>
               </div>
             </q-scroll-area>
           </q-tab-panel>
@@ -126,16 +143,16 @@
 </template>
 
 <script>
-import tab3 from '../AppTools/tab3.vue';
-import tab1 from '../AppTools/tab1.vue';
-import tab2 from '../AppTools/tab2.vue';
+import GetStarted from '../AppTools/GetStarted.vue';
+import WetlandsByDesign from '../AppTools/WetlandsByDesign.vue';
+import ProtectingGroundwater from '../AppTools/ProtectingGroundwater.vue';
 
 export default {
   name: 'ThePanelTabsVertical',
   components: {
-    tab1,
-    tab2,
-    tab3,
+    GetStarted,
+    WetlandsByDesign,
+    ProtectingGroundwater,
   },
   data() {
     return {
@@ -146,6 +163,14 @@ export default {
   computed: {
     smallScreen() {
       return this.$q.screen.lt.sm;
+    },
+    wbdApp: {
+      get() {
+        return this.$store.state.wbdApp;
+      },
+      set(value) {
+        this.$store.commit('updateWbdApp', value);
+      },
     },
   },
 };

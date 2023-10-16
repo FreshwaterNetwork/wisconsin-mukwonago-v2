@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <v-snackbar
+    <v-snackbar
       v-if="updateExists"
       class="q-pa-md"
       bottom
@@ -15,7 +15,7 @@
           Update
         </q-btn></span
       >
-    </v-snackbar> -->
+    </v-snackbar>
     <div id="print" class="print-only">
       <the-print></the-print>
     </div>
@@ -60,10 +60,6 @@
           @update:model-value="updateCondensedTabs($event)"
         >
           <template v-slot:before>
-            <!--PANEL COMPONENT-->
-            <!-- <the-panel-tabs-vertcial
-              v-if="$store.state.config.panelDisplayType == 'tabsVertical'"
-            ></the-panel-tabs-vertcial> -->
             <router-view></router-view>
           </template>
 
@@ -112,18 +108,6 @@ export default {
       registration: null,
       updateExists: false,
     };
-  },
-  created() {
-    document.addEventListener('swUpdated', this.updateAvailable, {
-      once: true,
-    });
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      // We'll also need to add 'refreshing' to our data originally set to false.
-      if (this.refreshing) return;
-      this.refreshing = true;
-      // Here the actual reload of the page occurs
-      window.location.reload();
-    });
   },
   computed: {
     smallScreen() {

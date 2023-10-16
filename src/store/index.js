@@ -64,6 +64,43 @@ export default createStore({
     resultsFeatures: [],
     featCounter: 0,
     nonCoordLoc: false,
+    wetlandWatersheds: [],
+    projectType: 'new',
+    wbdApp: '',
+    showServices: false,
+    hideServices: false,
+    showNumServices: false,
+    hideNumServices: false,
+    serviceType: 'nos',
+    serviceOption: 'Count of Services ≥ High',
+    rfOption: 'Overall Feasibility',
+    option: 'Combined Services',
+    guild: '',
+    guildLayer: 0,
+    hucHover: false,
+    rangeOfService: false,
+    optionLayers: { id8: 30, id10: 31, id12: 32 },
+    rfLayer: 54,
+    serviceLayer: 16,
+    removeGuild: false,
+    watershedRange: [],
+    countOfServices: 0,
+    floodAbatement: 0,
+    fishAquaticHabitat: 0,
+    phosphorousRetention: 0,
+    sedimentRetention: 0,
+    nitrogenReduction: 0,
+    surfaceWaterSupply: 0,
+    shorelineProtection: 0,
+    carbonStorage: 0,
+    floristicIntegrity: 0,
+    watershedAcres: 0,
+    wetlandId: '',
+    overallFeas: 0,
+    landUseCons: 0,
+    invasiveSpeciesCons: 0,
+    loadingRf: false,
+    loadingComplete: false,
   },
   mutations: {
     //data retrieved from web services
@@ -134,6 +171,117 @@ export default createStore({
     },
     updateNonCoordLoc(state, val) {
       state.nonCoordLoc = val;
+    },
+    updateWetlandWatersheds(state, val) {
+      state.wetlandWatersheds = val;
+    },
+    updateProjectType(state, val) {
+      state.projectType = val;
+    },
+    updateWbdApp(state, val) {
+      state.wbdApp = val;
+    },
+    updateShowServices(state, val) {
+      state.showServices = val;
+    },
+    updateHideNumServices(state, val) {
+      state.hideNumServices = val;
+    },
+    updateHideServices(state, val) {
+      state.hideServices = val;
+    },
+    updateShowNumServices(state, val) {
+      state.showNumServices = val;
+    },
+    updateServiceType(state, val) {
+      state.serviceType = val;
+    },
+    updateServiceOption(state, val) {
+      state.serviceOption = val;
+    },
+    updateRfOption(state, val) {
+      state.rfOption = val;
+    },
+    updateOption(state, val) {
+      state.option = val;
+    },
+    updateHucHover(state, val) {
+      state.hucHover = val;
+    },
+    updateRangeOfService(state, val) {
+      state.rangeOfService = val;
+    },
+    updateOptionLayers(state, val) {
+      state.optionLayers = val;
+    },
+    updateRfLayer(state, val) {
+      state.rfLayer = val;
+    },
+    updateServiceLayer(state, val) {
+      state.serviceLayer = val;
+    },
+    updateGuild(state, val) {
+      state.guild = val;
+    },
+    updateGuildLayer(state, val) {
+      state.guildLayer = val;
+    },
+    updateRemoveGuild(state, val) {
+      state.removeGuild = val;
+    },
+    updateWatershedRange(state, val) {
+      state.watershedRange = val;
+    },
+    updateCountOfServices(state, val) {
+      state.countOfServices = val;
+    },
+    updateFloodAbatement(state, val) {
+      state.floodAbatement = val;
+    },
+    updateFishAquaticHabitat(state, val) {
+      state.fishAquaticHabitat = val;
+    },
+    updatePhosphorousRetention(state, val) {
+      state.phosphorousRetention = val;
+    },
+    updateSedimentRetention(state, val) {
+      state.sedimentRetention = val;
+    },
+    updateNitrogenReduction(state, val) {
+      state.nitrogenReduction = val;
+    },
+    updateSurfaceWaterSupply(state, val) {
+      state.surfaceWaterSupply = val;
+    },
+    updateShorelineProtection(state, val) {
+      state.shorelineProtection = val;
+    },
+    updateCarbonStorage(state, val) {
+      state.carbonStorage = val;
+    },
+    updateFloristicIntegrity(state, val) {
+      state.floristicIntegrity = val;
+    },
+    updateWatershedAcres(state, val) {
+      state.watershedAcres = val;
+    },
+    updateWetlandId(state, val) {
+      state.wetlandId = val;
+    },
+    updateOverallFeas(state, val) {
+      state.overallFeas = val;
+    },
+    updateLandUseCons(state, val) {
+      state.landUseCons = val;
+    },
+    updateInvasiveSpeciesCons(state, val) {
+      state.invasiveSpeciesCons = val;
+    },
+    updateLoadingRf(state, val) {
+      state.loadingRf = val;
+    },
+    updateLoadingComplete(state, val) {
+      state.loadingComplete = val;
     },
   },
 
