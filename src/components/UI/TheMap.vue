@@ -57,7 +57,7 @@ import Sketch from '@arcgis/core/widgets/Sketch';
 import Point from '@arcgis/core/geometry/Point.js';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol.js';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer.js';
-// import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
+import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
 // import FeatureSet from '@arcgis/core/rest/support/FeatureSet.js';
 // import Extent from '@arcgis/core/geometry/Extent.js';
 // import Renderer from '@arcgis/core/renderers/Renderer.js';
@@ -76,6 +76,9 @@ let esri = {
   mapImage: '',
   sketch: '',
   graphicsLayer: '',
+  selectedWatershed: '',
+  selectedWatershedLayerView: '',
+  createEvent: false,
   selectSite: false,
 };
 
@@ -997,9 +1000,8 @@ export default {
         esri.map.remove(muk_streams);
         esri.graphicsLayer.removeAll();
 
-        console.log(esri.mapView);
-
         esri.mapView.goTo({ center: c, zoom: z });
+        // esri.sketch.visible = true;
         esri.map.add(esri.mapImage);
         _this.updateFeatureLayer(1);
       } else {
@@ -1762,8 +1764,6 @@ export default {
           esri.featureLayer.destroy();
         }
 
-        console.log(esri.map);
-
         esri.mapView.whenLayerView(muk_srl).then(function(layerView) {
           muk_srlLayerView = layerView;
         });
@@ -2026,7 +2026,6 @@ export default {
             if (name) {
               if (this.h6 == false) {
                 huc = hitGraphic.attributes.WHUC6;
-                console.log(huc);
                 query = huc6ws.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
@@ -2259,7 +2258,6 @@ export default {
                 query = huc12ws.createQuery(point);
                 query.geometry = point;
                 huc12ws.queryFeatures(query).then(function(result) {
-                  console.log(result);
                   let feature = result.features[0].attributes;
 
                   huc12 = {
@@ -2278,8 +2276,6 @@ export default {
                   _this.h12 = true;
                   _this.selectSite = true;
 
-                  console.log('entered huc12 query');
-
                   esri.mapImage.sublayers.forEach((layer) => {
                     if (
                       layer.title ==
@@ -2294,24 +2290,13 @@ export default {
 
                   esri.mapView.goTo({ center: point, zoom: 11 });
 
-                  esri.mapView.ui.add(esri.sketch, 'top-leading');
                   _this.h6 = false;
                   _this.h8 = false;
                   _this.h10 = false;
-                  console.log(_this.layerIndex);
+
                   // _this.h12 = false;
                 });
               }
-            } else if (_this.h12 == true && _this.selectSite == true) {
-              console.log(_this.layerIndex);
-
-              // let selectedWatershed = new FeatureLayer({
-              //   url:
-              //     'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
-              //     _this.layerIndex,
-              // });
-
-              // console.log(selectedWatershed);
             }
           }
         });
@@ -2539,6 +2524,8 @@ export default {
       creationMode: 'update',
       availableCreateTools: ['polygon'],
     });
+    esri.mapView.ui.add(esri.sketch, 'top-leading');
+    esri.sketch.visible = false;
     esri.sketch.visibleElements = {
       selectionTools: {
         'lasso-selection': false,
@@ -2548,8 +2535,11 @@ export default {
     };
     esri.sketch.on('create', function(event) {
       if (event.state === 'complete') {
-        esri.sketch.visible = true;
+        // esri.sketch.visible = true;
         esri.mapView.goTo(esri.graphicsLayer.graphics.items[0]);
+        console.log(esri.graphicsLayer);
+        esri.graphicsLayer.visible = true;
+        console.log(event);
       }
     });
 
@@ -2655,6 +2645,34 @@ export default {
       });
     },
 
+    highlightPolygon(response) {
+      esri.mapView.graphics.removeAll();
+
+      // Create a blue polygon
+
+      let symbol = new SimpleFillSymbol({
+        color: [255, 255, 0, 0.0],
+
+        style: 'solid',
+
+        outline: {
+          color: [255, 255, 255],
+
+          width: 3,
+        },
+      });
+
+      console.log(response);
+
+      var selectionGraphic = response.results[0].graphic;
+
+      selectionGraphic.symbol = symbol;
+
+      esri.mapView.graphics.add(selectionGraphic);
+
+      esri.mapView.goTo(selectionGraphic);
+    },
+
     grabRangeData() {
       let _this = this;
       _this.rangeOfService = true;
@@ -2665,14 +2683,24 @@ export default {
       if (this.h12 == true) {
         this.watershedRange = [];
 
-        console.log(this.layerIndex);
         let url =
           'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
           this.layerIndex;
 
-        let selectedWatershed = new FeatureLayer({
+        esri.selectedWatershed = new FeatureLayer({
           url: url,
         });
+
+        // esri.map.add(esri.selectedWatershed);
+
+        // esri.selectedWatershedLayerView = '';
+
+        // esri.mapView
+        //   .whenLayerView(esri.selectedWatershed)
+        //   .then(function(layerView) {
+        //     esri.selectedWatershedLayerView = layerView;
+        //     console.log(esri.selectedWatershedLayerView);
+        //   });
 
         let urlRF =
           'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
@@ -2689,12 +2717,6 @@ export default {
           url: urlPRW,
         });
 
-        // let selectedWatershedLayerView;
-
-        // esri.mapView.whenLayerView(selectedWatershed).then(function(layerView) {
-        //   selectedWatershedLayerView = layerView;
-        // });
-
         esri.mapView.on('click', function(response) {
           let potentialId;
 
@@ -2703,7 +2725,7 @@ export default {
             y: response.mapPoint.latitude,
           });
 
-          let query = selectedWatershed.createQuery(point);
+          let query = esri.selectedWatershed.createQuery(point);
           query.geometry = point;
 
           let rfquery = rfWatershed.createQuery(point);
@@ -2712,16 +2734,18 @@ export default {
           let prwquery = rfWatershed.createQuery();
 
           if (_this.serviceType === 'nos') {
-            selectedWatershed.queryFeatures(query).then(function(result) {
+            esri.selectedWatershed.queryFeatures(query).then(function(result) {
               let feature = result.features[0].attributes;
 
               // if (highlightWetland) {
               //   highlightWetland.remove();
               // } else {
-              //   highlightWetland = selectedWatershedLayerView.highlight(
+              //   highlightWetland = esri.selectedWatershedLayerView.highlight(
               //     feature['OBJECTID']
               //   );
               // }
+
+              // _this.highlightPolygon(response);
 
               _this.wetlandId = feature.wetlandIdString;
               _this.floodAbatement = _this.numToRange(feature.FA_RANK);
@@ -2735,11 +2759,6 @@ export default {
               _this.surfaceWaterSupply = _this.numToRange(feature.SBS_RANK);
               _this.countOfServices = _this.numToRange(feature.ALL_RANK);
               _this.watershedAcres = feature.acres;
-
-              _this.applyFilter(
-                selectedWatershed,
-                'wetlandIdString = "' + _this.wetlandId + '"'
-              );
             });
           } else if (_this.serviceType === 'rf') {
             rfWatershed.queryFeatures(rfquery).then(function(result) {
@@ -2755,8 +2774,6 @@ export default {
 
               prwLayer.queryFeatures(prwquery).then(function(result) {
                 let feat = result.features[0].attributes;
-                console.log(result);
-                console.log(prwquery);
                 _this.loadingRf = false;
                 _this.loadingComplete = true;
 
@@ -2764,16 +2781,8 @@ export default {
                 _this.overallFeas = feat.FEAS_Total;
                 _this.landUseCons = feat.Num_Val;
                 _this.invasiveSpeciesCons = feat.IS_Num;
-
-                console.log(potentialId);
-                console.log(_this.wetlandIdString);
-                console.log(_this.overallFeas);
-                console.log(_this.landUseCons);
-                console.log(_this.invasiveSpeciesCons);
               });
             });
-
-            console.log(_this.rfLayer);
           }
         });
       }
