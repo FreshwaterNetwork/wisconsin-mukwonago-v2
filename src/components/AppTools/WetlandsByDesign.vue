@@ -44,7 +44,7 @@
     </div>
     <hr />
     <div class="text-body1 q-pa-sm">
-      <q-btn-toggle
+      <!-- <q-btn-toggle
         spread
         toggle-color="primary"
         v-model="this.projectType"
@@ -52,11 +52,11 @@
           { label: 'New Site', value: 'new' },
           { label: 'Existing Site', value: 'existing' },
         ]"
-      />
+      /> -->
       <!-- New Site -->
       <div v-if="this.projectType === 'new'" class="q-pa-md">
         <span
-          v-if="this.firstSelected == false && this.wetlandWatersheds == []"
+          v-if="this.firstSelected == false"
           style="width: fit-content; margin: auto; display: block;"
         >
           <b>Select a Watershed to get started</b>
@@ -78,6 +78,13 @@
                 <q-item-section>
                   {{ ws.desc + ': ' + ws.name + ' - ' + ws.huc }}
                 </q-item-section>
+                <q-btn
+                  dense
+                  color="primary"
+                  style="margin-top: 4px;"
+                  @click="previousHuc(ws.desc, ws.huc)"
+                  >Zoom To</q-btn
+                >
               </q-item>
             </q-list>
           </q-expansion-item>
@@ -427,7 +434,6 @@ export default {
   components: { IconButton },
   data() {
     return {
-      firstSelected: false,
       guildOptions: [
         {
           label: 'All Guilds',
@@ -948,6 +954,17 @@ export default {
         this.$store.commit('updateLoadingComplete', value);
       },
     },
+    firstSelected() {
+      return this.$store.state.firstSelected;
+    },
+    previousSelected: {
+      get() {
+        return this.$store.state.previousSelected;
+      },
+      set(value) {
+        this.$store.commit('updatePreviousSelected', value);
+      },
+    },
   },
   methods: {
     noGuild() {
@@ -966,6 +983,9 @@ export default {
           };
         }
       });
+    },
+    previousHuc(huc, num) {
+      this.previousSelected = { hucLevel: huc, hucNum: num };
     },
   },
   watch: {
@@ -1005,8 +1025,6 @@ export default {
           this.guildLayer = option.id;
         }
       });
-
-      console.log(this.guildLayer);
     },
   },
 };

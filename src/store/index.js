@@ -101,6 +101,8 @@ export default createStore({
     invasiveSpeciesCons: 0,
     loadingRf: false,
     loadingComplete: false,
+    firstSelected: false,
+    previousSelected: {},
   },
   mutations: {
     //data retrieved from web services
@@ -282,6 +284,12 @@ export default createStore({
     },
     updateLoadingComplete(state, val) {
       state.loadingComplete = val;
+    },
+    updateFirstSelected(state, val) {
+      state.firstSelected = val;
+    },
+    updatePreviousSelected(state, val) {
+      state.previousSelected = val;
     },
   },
 
