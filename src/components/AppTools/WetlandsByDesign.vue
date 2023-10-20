@@ -44,7 +44,7 @@
     </div>
     <hr />
     <div class="text-body1 q-pa-sm">
-      <q-btn-toggle
+      <!-- <q-btn-toggle
         spread
         toggle-color="primary"
         v-model="this.projectType"
@@ -52,16 +52,15 @@
           { label: 'New Site', value: 'new' },
           { label: 'Existing Site', value: 'existing' },
         ]"
-      />
+      /> -->
       <!-- New Site -->
       <div v-if="this.projectType === 'new'" class="q-pa-md">
         <span
-          v-if="this.firstSelected == false && this.wetlandWatersheds == []"
+          v-if="this.firstSelected == false"
           style="width: fit-content; margin: auto; display: block;"
         >
-          <b>Select a Watershed to get started</b>
+          <b>Hover and click on a watershed to get started</b>
         </span>
-        <!-- add v-if firstselected = true to div below once layers are added to themap.vue -->
         <div>
           <q-expansion-item
             default-opened
@@ -78,6 +77,14 @@
                 <q-item-section>
                   {{ ws.desc + ': ' + ws.name + ' - ' + ws.huc }}
                 </q-item-section>
+                <q-btn
+                  dense
+                  v-if="ws.desc == 'HUC 6' || ws.desc == 'HUC 8'"
+                  color="primary"
+                  style="margin-top: 4px;"
+                  @click="previousHuc(ws.desc, ws.huc)"
+                  >Zoom To</q-btn
+                >
               </q-item>
             </q-list>
           </q-expansion-item>
@@ -395,8 +402,16 @@
           </div>
         </div>
       </div>
+      <q-btn
+        color="negative"
+        v-if="firstSelected == true"
+        dense
+        style="margin: auto; width: max-content; display: block;"
+        @click="this.$router.go()"
+        >Start Over</q-btn
+      >
       <!-- Existing Site -->
-      <div v-if="this.projectType === 'existing'">
+      <!-- <div v-if="this.projectType === 'existing'">
         <div style="display: flex;">
           <q-input
             outlined
@@ -414,7 +429,7 @@
             @click="updateLocationValue"
           />
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -427,7 +442,6 @@ export default {
   components: { IconButton },
   data() {
     return {
-      firstSelected: false,
       guildOptions: [
         {
           label: 'All Guilds',
@@ -948,6 +962,23 @@ export default {
         this.$store.commit('updateLoadingComplete', value);
       },
     },
+    firstSelected() {
+      return this.$store.state.firstSelected;
+    },
+    previousSelected: {
+      get() {
+        return this.$store.state.previousSelected;
+      },
+      set(value) {
+        this.$store.commit('updatePreviousSelected', value);
+      },
+    },
+    selectedData() {
+      return this.$store.state.selectedData;
+    },
+    rfData() {
+      return this.$store.state.rfData;
+    },
   },
   methods: {
     noGuild() {
@@ -966,6 +997,20 @@ export default {
           };
         }
       });
+    },
+    previousHuc(huc, num) {
+      this.previousSelected = { hucLevel: huc, hucNum: num };
+    },
+    numToRange(num) {
+      if (num == 0) {
+        return 'Not Applicable';
+      } else if (num == 1) {
+        return 'Very High';
+      } else if (num == 2) {
+        return 'High';
+      } else if (num == 3) {
+        return 'Moderate';
+      }
     },
   },
   watch: {
@@ -989,11 +1034,11 @@ export default {
 
       this.serviceOptions.forEach((option) => {
         if (option.label == this.serviceOption) {
-          if (this.serviceType === 'nos') {
-            this.serviceLayer = option.nosId;
-          } else if (this.serviceType === 'rf') {
-            this.serviceLayer = option.rfId;
-          }
+          // if (this.serviceType === 'nos') {
+          //   this.serviceLayer = option.nosId;
+          // } else if (this.serviceType === 'rf') {
+          this.serviceLayer = option.rfId;
+          // }
         }
       });
     },
@@ -1005,8 +1050,6 @@ export default {
           this.guildLayer = option.id;
         }
       });
-
-      console.log(this.guildLayer);
     },
   },
 };

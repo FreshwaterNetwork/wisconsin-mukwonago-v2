@@ -57,7 +57,7 @@ import Sketch from '@arcgis/core/widgets/Sketch';
 import Point from '@arcgis/core/geometry/Point.js';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol.js';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer.js';
-import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
+// import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
 // import FeatureSet from '@arcgis/core/rest/support/FeatureSet.js';
 // import Extent from '@arcgis/core/geometry/Extent.js';
 // import Renderer from '@arcgis/core/renderers/Renderer.js';
@@ -78,8 +78,11 @@ let esri = {
   graphicsLayer: '',
   selectedWatershed: '',
   selectedWatershedLayerView: '',
+  rfWatershed: '',
+  rfWatershedLayerView: '',
   createEvent: false,
   selectSite: false,
+  serviceChangeWs: '',
 };
 
 export default {
@@ -150,6 +153,7 @@ export default {
       h12: false,
       selectedHuc: '',
       layerIndex: 0,
+      highlightWetland: '',
     };
   },
   computed: {
@@ -483,6 +487,33 @@ export default {
         this.$store.commit('updateLoadingComplete', value);
       },
     },
+    firstSelected: {
+      get() {
+        return this.$store.state.firstSelected;
+      },
+      set(value) {
+        this.$store.commit('updateFirstSelected', value);
+      },
+    },
+    previousSelected() {
+      return this.$store.state.previousSelected;
+    },
+    selectedData: {
+      get() {
+        return this.$store.state.selectedData;
+      },
+      set(value) {
+        this.$store.commit('updateSelectedData', value);
+      },
+    },
+    rfData: {
+      get() {
+        return this.$store.state.rfData;
+      },
+      set(value) {
+        this.$store.commit('updateRfData', value);
+      },
+    },
   },
   watch: {
     supportingMapVisibleLayers() {
@@ -556,39 +587,185 @@ export default {
 
       esri.mapImage.findSublayerById(this.guildLayer).visible = true;
     },
-    serviceOption() {
+    serviceLayer() {
       esri.mapImage.findSublayerById(this.layerIndex).visible = false;
+      esri.mapImage.findSublayerById(this.rfLayer).visible = false;
+      esri.map.remove(esri.selectedWatershed);
+      esri.map.remove(esri.rfWatershed);
+      if (esri.serviceChangeWs) {
+        esri.map.remove(esri.serviceChangeWs);
+      }
+      esri.serviceChangeWs = '';
+      // this.h8 = true;
+      // esri.rfWatershed = '';
+
+      // if (this.highlightWetland) {
+      //   this.highlightWetland.remove();
+      //   this.highlightWetland = null;
+      // }
 
       esri.mapImage.sublayers.forEach((layer) => {
+        if (
+          layer.title ==
+          'Potentially Restorable Wetlands - ' + this.serviceOption
+        ) {
+          this.layerIndex = layer.id;
+          let urlRF;
+
+          urlRF =
+            'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+            this.serviceLayer;
+
+          esri.serviceChangeWs = new FeatureLayer({
+            url: urlRF,
+            title: 'Potentially Restorable Wetlands - ' + this.serviceOption,
+          });
+
+          esri.serviceChangeWs.definitionExpression =
+            "WHUC10 = '" + this.selectedHuc + "'";
+          // esri.map.add(esri.serviceChangeWs);
+        }
+
         if (layer.title == 'Current Wetlands - ' + this.serviceOption) {
           this.layerIndex = layer.id;
-          esri.mapImage.findSublayerById(this.layerIndex).visible = true;
+
+          let url =
+            'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+            this.layerIndex;
+
+          esri.selectedWatershed = new FeatureLayer({
+            url: url,
+            title: this.serviceOption,
+          });
+
+          esri.selectedWatershed.definitionExpression =
+            "WHUC10 = '" + this.selectedHuc + "'";
+          esri.map.add(esri.selectedWatershed);
+          // esri.map.add(esri.serviceChangeWs);
         }
+
+        esri.map.add(esri.serviceChangeWs);
       });
     },
     serviceType() {
+      if (this.highlightWetland) {
+        this.highlightWetland.remove();
+        this.highlightWetland = null;
+      }
+
+      esri.mapImage.findSublayerById(54).visible = false;
+      esri.map.remove(esri.rfWatershed);
+      esri.map.remove(esri.selectedWatershed);
+
       if (this.serviceType === 'rf') {
         if (esri.mapImage.findSublayerById(this.layerIndex).visible == true) {
           esri.mapImage.findSublayerById(this.layerIndex).visible = false;
         }
         esri.mapImage.findSublayerById(70).visible = true;
-        esri.mapImage.findSublayerById(this.rfLayer).visible = true;
+        esri.map.add(esri.rfWatershed);
+        esri.map.remove(esri.selectedWatershed);
       } else if (this.serviceType === 'nos') {
-        if (esri.mapImage.findSublayerById(this.rfLayer).visible == true) {
-          esri.mapImage.findSublayerById(this.rfLayer).visible = false;
-        }
+        esri.map.add(esri.rfWatershed);
         esri.mapImage.findSublayerById(70).visible = false;
 
-        esri.mapImage.findSublayerById(this.layerIndex).visible = true;
+        esri.map.add(esri.selectedWatershed);
       }
     },
     rfLayer() {
-      esri.mapImage.findSublayerById(54).visible = false;
-      esri.mapImage.findSublayerById(55).visible = false;
-      esri.mapImage.findSublayerById(56).visible = false;
-
       esri.mapImage.findSublayerById(70).visible = true;
-      esri.mapImage.findSublayerById(this.rfLayer).visible = true;
+      esri.mapImage.findSublayerById(54).visible = false;
+
+      esri.map.remove(esri.rfWatershed);
+      let urlRF;
+
+      if (this.serviceType == 'nos') {
+        urlRF =
+          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+          this.serviceLayer;
+      } else if (this.serviceType == 'rf') {
+        urlRF =
+          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+          this.rfLayer;
+      }
+
+      esri.rfWatershed = new FeatureLayer({
+        url: urlRF,
+        title: this.rfOption,
+      });
+
+      esri.rfWatershed.definitionExpression =
+        "WHUC10 = '" + this.selectedHuc + "'";
+
+      esri.map.add(esri.rfWatershed);
+    },
+    previousSelected() {
+      if (esri.featureLayer) {
+        esri.featureLayer.destroy();
+      }
+      if (esri.selectedWatershed) {
+        esri.selectedWatershed.destroy();
+      }
+      if (esri.rfWatershed) {
+        esri.rfWatershed.destroy();
+      }
+      if (esri.serviceChangeWs) {
+        esri.serviceChangeWs.destroy();
+      }
+      if (this.highlightWetland) {
+        this.highlightWetland.remove();
+        this.highlightWetland = null;
+      }
+      if (this.previousSelected.hucLevel == 'HUC 6') {
+        this.h8 = false;
+        this.h10 = false;
+        this.h12 = false;
+        this.showServices = true;
+        this.showNumServices = false;
+        this.selectSite = false;
+        this.rangeOfService = false;
+
+        esri.defExp = "WHUC6 = '" + this.previousSelected.hucNum + "'";
+        esri.mapImage.findSublayerById(0).definitionExpression =
+          "WHUC8 <> '" + this.previousSelected.hucNum + "'";
+
+        esri.mapImage.findSublayerById(1).visible = false;
+        esri.mapImage.findSublayerById(3).visible = false;
+        esri.mapImage.findSublayerById(4).visible = false;
+        esri.mapImage.findSublayerById(2).visible = true;
+
+        this.updateFeatureLayer(this.optionLayers.id8);
+
+        this.wetlandWatersheds.forEach((i, index) => {
+          if (i.desc != 'HUC 6') {
+            this.wetlandWatersheds.splice(index);
+          }
+        });
+      } else if (this.previousSelected.hucLevel == 'HUC 8') {
+        this.h8 = true;
+        this.h10 = false;
+        this.h12 = false;
+        this.showServices = true;
+        this.showNumServices = false;
+        this.selectSite = false;
+        this.rangeOfService = false;
+
+        esri.defExp = "WHUC8 = '" + this.previousSelected.hucNum + "'";
+        esri.mapImage.findSublayerById(0).definitionExpression =
+          "WHUC10 <> '" + this.previousSelected.hucNum + "'";
+
+        esri.mapImage.findSublayerById(1).visible = false;
+        esri.mapImage.findSublayerById(3).visible = true;
+        esri.mapImage.findSublayerById(4).visible = false;
+        esri.mapImage.findSublayerById(2).visible = false;
+
+        this.updateFeatureLayer(this.optionLayers.id10);
+
+        this.wetlandWatersheds.forEach((i, index) => {
+          if (i.desc == 'HUC 10') {
+            this.wetlandWatersheds.splice(index);
+          }
+        });
+      }
     },
   },
 
@@ -1888,8 +2065,6 @@ export default {
 
     let _this = this;
 
-    // esri.map.add(esri.mapImage);
-
     let highlightLake = '';
     let highlightStream = '';
 
@@ -2161,7 +2336,7 @@ export default {
         let huc6 = {};
         let huc8 = {};
         let huc10 = {};
-        let huc12 = {};
+        // let huc12 = {};
         let query;
 
         let point = new Point({
@@ -2194,6 +2369,7 @@ export default {
                 _this.h6 = true;
                 _this.wetlandWatersheds.push(huc6);
                 _this.showServices = true;
+                _this.firstSelected = true;
 
                 esri.defExp = "WHUC6 = '" + _this.selectedHuc + "'";
 
@@ -2222,8 +2398,17 @@ export default {
               });
             } else if (_this.h8 == true && _this.h10 == false) {
               esri.map.remove(huc10ws);
-              esri.mapImage.findSublayerById(3).visible = false;
-              esri.mapImage.findSublayerById(4).visible = true;
+              esri.map.remove(esri.rfWatershed);
+              huc10 = {};
+              // esri.mapImage.findSublayerById(3).visible = false;
+              // esri.mapImage.findSublayerById(4).visible = true;
+
+              if (esri.featureLayer) {
+                esri.featureLayer.destroy();
+              }
+
+              _this.showServices = false;
+              _this.showNumServices = true;
 
               query = huc10ws.createQuery(point);
               query.geometry = point;
@@ -2235,77 +2420,232 @@ export default {
                   huc: feature.WHUC10,
                 };
                 _this.selectedHuc = feature.WHUC10;
+                console.log(_this.selectedHuc);
                 _this.wetlandWatersheds.push(huc10);
                 _this.h10 = true;
+                _this.selectSite = true;
 
-                esri.defExp = "WHUC10 = '" + _this.selectedHuc + "'";
-                _this.updateFeatureLayer(_this.optionLayers.id12);
+                esri.mapImage.findSublayerById(0).definitionExpression =
+                  "WHUC10 <> '" + _this.selectedHuc + "'";
+
+                // esri.defExp = "WHUC10 = '" + _this.selectedHuc + "'";
+                // _this.updateFeatureLayer(_this.optionLayers.id12);
+                esri.mapImage.sublayers.forEach((layer) => {
+                  if (
+                    layer.title ==
+                    'Current Wetlands - ' + _this.serviceOption
+                  ) {
+                    _this.layerIndex = layer.id;
+
+                    let url =
+                      'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+                      _this.layerIndex;
+
+                    esri.selectedWatershed = new FeatureLayer({
+                      url: url,
+                      title: _this.serviceOption,
+                    });
+
+                    esri.selectedWatershed.definitionExpression =
+                      "WHUC10 = '" + _this.selectedHuc + "'";
+
+                    let urlRF;
+
+                    if (_this.serviceType == 'nos') {
+                      urlRF =
+                        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+                        _this.serviceLayer;
+                    } else if (_this.serviceType == 'rf') {
+                      urlRF =
+                        'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
+                        _this.rfLayer;
+                    }
+
+                    esri.rfWatershed = new FeatureLayer({
+                      url: urlRF,
+                      title: 'Potentially Restorable Wetlands',
+                    });
+
+                    esri.rfWatershedLayerView = {};
+
+                    esri.mapView
+                      .whenLayerView(esri.rfWatershed)
+                      .then(function(layerView) {
+                        esri.rfWatershedLayerView = layerView;
+                      });
+
+                    esri.rfWatershed.definitionExpression =
+                      "WHUC10 = '" + _this.selectedHuc + "'";
+
+                    if (esri.serviceChangeWs) {
+                      esri.map.remove(esri.serviceChangeWs);
+                      console.log('removed changews and added rfwatershed');
+                    }
+                    esri.map.add(esri.rfWatershed);
+                    esri.map.add(esri.selectedWatershed);
+                  }
+                });
               });
-            } else if (_this.h10 == true && _this.h12 == false) {
-              esri.mapImage.findSublayerById(3).visible = false;
-              esri.mapImage.findSublayerById(4).visible = true;
 
-              if (_this.wetlandWatersheds.length <= 3) {
-                esri.map.remove(huc12ws);
+              esri.mapView.goTo({ center: point, zoom: 9 });
 
-                if (esri.featureLayer) {
-                  esri.featureLayer.destroy();
+              // _this.h6 = false;
+              _this.h8 = false;
+              // _this.h10 = false;
+              _this.h12 = true;
+            }
+          } else if (_this.h12 == true) {
+            // get range data
+
+            _this.rangeOfService = true;
+            _this.wetlandIdString = '';
+            _this.watershedAcres = 0;
+            _this.watershedRange = [];
+            let potentialId;
+
+            let urlPRW =
+              'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/70';
+
+            let prwLayer = new FeatureLayer({
+              url: urlPRW,
+            });
+
+            let point = new Point({
+              x: response.mapPoint.longitude,
+              y: response.mapPoint.latitude,
+            });
+
+            if (_this.serviceType === 'nos') {
+              esri.selectedWatershedLayerView = {};
+
+              esri.mapView
+                .whenLayerView(esri.selectedWatershed)
+                .then(function(layerView) {
+                  esri.selectedWatershedLayerView = layerView;
+                });
+
+              let query = esri.selectedWatershed.createQuery(point);
+              query.geometry = point;
+
+              esri.selectedWatershed
+                .queryFeatures(query)
+                .then(function(result) {
+                  let feature = result.features[0].attributes;
+                  _this.selectedData = true;
+
+                  if (_this.highlightWetland) {
+                    _this.highlightWetland.remove();
+                    _this.highlightWetland = null;
+                  }
+
+                  if (
+                    _this.highlightWetland == null ||
+                    _this.highlightWetland == ''
+                  ) {
+                    _this.highlightWetland = esri.selectedWatershedLayerView.highlight(
+                      feature['OBJECTID']
+                    );
+                  }
+
+                  _this.wetlandId = feature.wetlandIdString;
+                  _this.floodAbatement = _this.numToRange(feature.FA_RANK);
+                  _this.sedimentRetention = _this.numToRange(feature.SS_RANK);
+                  _this.phosphorousRetention = _this.numToRange(
+                    feature.PR_RANK
+                  );
+                  _this.nitrogenReduction = _this.numToRange(feature.NR_RANK);
+                  _this.shorelineProtection = _this.numToRange(feature.SP_RANK);
+                  _this.fishAquaticHabitat = _this.numToRange(feature.FAH_RANK);
+                  _this.carbonStorage = _this.numToRange(feature.CS_RANK);
+                  _this.floristicIntegrity = _this.numToRange(feature.FQ_RANK);
+                  _this.surfaceWaterSupply = _this.numToRange(feature.SBS_RANK);
+                  _this.countOfServices = _this.numToRange(feature.ALL_RANK);
+                  _this.watershedAcres = feature.acres;
+                });
+
+              esri.rfWatershed.queryFeatures(query).then(function(result) {
+                let feature = result.features[0].attributes;
+                _this.rfData = true;
+
+                if (_this.highlightWetland) {
+                  _this.highlightWetland.remove();
+                  _this.highlightWetland = null;
                 }
 
-                _this.showServices = false;
-                _this.showNumServices = true;
+                if (
+                  _this.highlightWetland == null ||
+                  _this.highlightWetland == ''
+                ) {
+                  _this.highlightWetland = esri.rfWatershedLayerView.highlight(
+                    feature['OBJECTID']
+                  );
+                }
 
-                query = huc12ws.createQuery(point);
-                query.geometry = point;
-                huc12ws.queryFeatures(query).then(function(result) {
-                  let feature = result.features[0].attributes;
+                _this.wetlandId = feature.wetlandIdString;
+                _this.floodAbatement = _this.numToRange(feature.FA_RANK);
+                _this.sedimentRetention = _this.numToRange(feature.SS_RANK);
+                _this.phosphorousRetention = _this.numToRange(feature.PR_RANK);
+                _this.nitrogenReduction = _this.numToRange(feature.NR_RANK);
+                _this.shorelineProtection = _this.numToRange(feature.SP_RANK);
+                _this.fishAquaticHabitat = _this.numToRange(feature.FAH_RANK);
+                _this.carbonStorage = _this.numToRange(feature.CS_RANK);
+                _this.floristicIntegrity = _this.numToRange(feature.FQ_RANK);
+                _this.surfaceWaterSupply = _this.numToRange(feature.SBS_RANK);
+                _this.countOfServices = _this.numToRange(feature.ALL_RANK);
+                _this.watershedAcres = feature.acres;
+              });
+            } else if (_this.serviceType === 'rf') {
+              esri.map.remove(esri.selectedWatershed);
+              esri.map.remove(esri.serviceChangeWs);
+              esri.mapImage.findSublayerById(_this.rfLayer).visible = true;
 
-                  huc12 = {
-                    desc: 'HUC 12',
-                    name: feature.name,
-                    huc: feature.WHUC12,
-                  };
+              let rfquery = esri.rfWatershed.createQuery(point);
+              rfquery.geometry = point;
 
-                  _this.selectedHuc = feature.WHUC12;
+              esri.rfWatershed.queryFeatures(rfquery).then(function(result) {
+                let feature = result.features[0].attributes;
 
-                  esri.mapImage.findSublayerById(0).definitionExpression =
-                    "WHUC12 <> '" + _this.selectedHuc + "'";
+                if (_this.highlightWetland) {
+                  _this.highlightWetland.remove();
+                  _this.highlightWetland = null;
+                }
 
-                  _this.wetlandWatersheds.push(huc12);
+                if (
+                  _this.highlightWetland == null ||
+                  _this.highlightWetland == ''
+                ) {
+                  _this.highlightWetland = esri.rfWatershedLayerView.highlight(
+                    feature['OBJECTID']
+                  );
+                }
 
-                  _this.h12 = true;
-                  _this.selectSite = true;
+                potentialId = feature.wetlandIdString;
+                _this.watershedAcres = feature.acres;
 
-                  esri.mapImage.sublayers.forEach((layer) => {
-                    if (
-                      layer.title ==
-                      'Current Wetlands - ' + _this.serviceOption
-                    ) {
-                      _this.layerIndex = layer.id;
-                      esri.mapImage.findSublayerById(
-                        _this.layerIndex
-                      ).visible = true;
-                    }
-                  });
+                let prwquery = esri.rfWatershed.createQuery();
+                prwquery.where = 'wetlandIdString = ' + "'" + potentialId + "'";
 
-                  esri.mapView.goTo({ center: point, zoom: 11 });
+                _this.loadingRf = true;
+                _this.loadingComplete = false;
 
-                  _this.h6 = false;
-                  _this.h8 = false;
-                  _this.h10 = false;
+                prwLayer.queryFeatures(prwquery).then(function(result) {
+                  let feat = result.features[0].attributes;
+                  _this.loadingRf = false;
+                  _this.loadingComplete = true;
 
-                  // _this.h12 = false;
+                  _this.wetlandId = feat.wetlandIdString;
+                  _this.overallFeas = feat.FEAS_Total;
+                  _this.landUseCons = feat.Num_Val;
+                  _this.invasiveSpeciesCons = feat.IS_Num;
                 });
-              }
+              });
             }
           }
         });
       }
     });
 
-    _this.$watch('h12', () => {
-      this.grabRangeData();
-    });
+    // _this.$watch('h12', () => {});
 
     _this.$watch('locationValue', () => {
       console.log(this.locationValue);
@@ -2452,7 +2792,6 @@ export default {
 
               if (feature) {
                 if (highlightSrl) {
-                  console.log('removing highlight');
                   highlightSrl.remove();
                   highlightSrl = null;
                 } else {
@@ -2550,8 +2889,16 @@ export default {
     esri.mapView.ui.add(esri.measurement, 'top-left');
 
     // create legend widget
+    var numbers = Array.from({ length: 71 }, (_, i) => i);
+    console.log(numbers);
     esri.legend = new Legend({
       view: esri.mapView,
+      // layerInfos: [
+      //   {
+      //     layer: esri.mapImage,
+      //     sublayerIds: numbers,
+      //   },
+      // ],
     });
 
     // create expand widget to hide and show legend
@@ -2643,149 +2990,6 @@ export default {
       esri.featureLayer.queryExtent().then(function(results) {
         esri.mapView.goTo(results.extent);
       });
-    },
-
-    highlightPolygon(response) {
-      esri.mapView.graphics.removeAll();
-
-      // Create a blue polygon
-
-      let symbol = new SimpleFillSymbol({
-        color: [255, 255, 0, 0.0],
-
-        style: 'solid',
-
-        outline: {
-          color: [255, 255, 255],
-
-          width: 3,
-        },
-      });
-
-      console.log(response);
-
-      var selectionGraphic = response.results[0].graphic;
-
-      selectionGraphic.symbol = symbol;
-
-      esri.mapView.graphics.add(selectionGraphic);
-
-      esri.mapView.goTo(selectionGraphic);
-    },
-
-    grabRangeData() {
-      let _this = this;
-      _this.rangeOfService = true;
-      _this.wetlandIdString = '';
-      _this.watershedAcres = 0;
-      // let highlightWetland = '';
-
-      if (this.h12 == true) {
-        this.watershedRange = [];
-
-        let url =
-          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
-          this.layerIndex;
-
-        esri.selectedWatershed = new FeatureLayer({
-          url: url,
-        });
-
-        // esri.map.add(esri.selectedWatershed);
-
-        // esri.selectedWatershedLayerView = '';
-
-        // esri.mapView
-        //   .whenLayerView(esri.selectedWatershed)
-        //   .then(function(layerView) {
-        //     esri.selectedWatershedLayerView = layerView;
-        //     console.log(esri.selectedWatershedLayerView);
-        //   });
-
-        let urlRF =
-          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
-          this.rfLayer;
-
-        let rfWatershed = new FeatureLayer({
-          url: urlRF,
-        });
-
-        let urlPRW =
-          'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/70';
-
-        let prwLayer = new FeatureLayer({
-          url: urlPRW,
-        });
-
-        esri.mapView.on('click', function(response) {
-          let potentialId;
-
-          let point = new Point({
-            x: response.mapPoint.longitude,
-            y: response.mapPoint.latitude,
-          });
-
-          let query = esri.selectedWatershed.createQuery(point);
-          query.geometry = point;
-
-          let rfquery = rfWatershed.createQuery(point);
-          rfquery.geometry = point;
-
-          let prwquery = rfWatershed.createQuery();
-
-          if (_this.serviceType === 'nos') {
-            esri.selectedWatershed.queryFeatures(query).then(function(result) {
-              let feature = result.features[0].attributes;
-
-              // if (highlightWetland) {
-              //   highlightWetland.remove();
-              // } else {
-              //   highlightWetland = esri.selectedWatershedLayerView.highlight(
-              //     feature['OBJECTID']
-              //   );
-              // }
-
-              // _this.highlightPolygon(response);
-
-              _this.wetlandId = feature.wetlandIdString;
-              _this.floodAbatement = _this.numToRange(feature.FA_RANK);
-              _this.sedimentRetention = _this.numToRange(feature.SS_RANK);
-              _this.phosphorousRetention = _this.numToRange(feature.PR_RANK);
-              _this.nitrogenReduction = _this.numToRange(feature.NR_RANK);
-              _this.shorelineProtection = _this.numToRange(feature.SP_RANK);
-              _this.fishAquaticHabitat = _this.numToRange(feature.FAH_RANK);
-              _this.carbonStorage = _this.numToRange(feature.CS_RANK);
-              _this.floristicIntegrity = _this.numToRange(feature.FQ_RANK);
-              _this.surfaceWaterSupply = _this.numToRange(feature.SBS_RANK);
-              _this.countOfServices = _this.numToRange(feature.ALL_RANK);
-              _this.watershedAcres = feature.acres;
-            });
-          } else if (_this.serviceType === 'rf') {
-            rfWatershed.queryFeatures(rfquery).then(function(result) {
-              let feature = result.features[0].attributes;
-
-              potentialId = feature.wetlandIdString;
-              _this.watershedAcres = feature.acres;
-
-              prwquery.where = 'wetlandIdString = ' + "'" + potentialId + "'";
-
-              _this.loadingRf = true;
-              _this.loadingComplete = false;
-
-              prwLayer.queryFeatures(prwquery).then(function(result) {
-                let feat = result.features[0].attributes;
-                _this.loadingRf = false;
-                _this.loadingComplete = true;
-
-                _this.wetlandId = feat.wetlandIdString;
-                _this.overallFeas = feat.FEAS_Total;
-                _this.landUseCons = feat.Num_Val;
-                _this.invasiveSpeciesCons = feat.IS_Num;
-              });
-            });
-          }
-        });
-      }
     },
 
     numToRange(num) {
@@ -3142,7 +3346,9 @@ export default {
   box-shadow: 0 1px 2px rgb(0 0 0 / 60%);
 }
 #info {
-  background-color: #c1e7c1;
+  background-color: black;
+  opacity: 0.5;
+  color: white;
   height: 40px;
   width: auto;
   font-size: large;
@@ -3152,6 +3358,7 @@ export default {
   display: block;
   border-radius: 3px;
   padding-top: 5px !important;
+  visibility: hidden;
 }
 
 esri-expand__content esri-expand__content--expanded div {
@@ -3202,3 +3409,4 @@ esri-expand__content esri-expand__content--expanded div {
   background-color: white !important;
 }
 </style>
+http://localhost:8080/protecting-groundwater
