@@ -103,6 +103,8 @@ export default createStore({
     loadingComplete: false,
     firstSelected: false,
     previousSelected: {},
+    selectedData: false,
+    rfData: false,
   },
   mutations: {
     //data retrieved from web services
@@ -290,6 +292,12 @@ export default createStore({
     },
     updatePreviousSelected(state, val) {
       state.previousSelected = val;
+    },
+    updateSelectedData(state, val) {
+      state.selectedData = val;
+    },
+    updateRfData(state, val) {
+      state.rfData = val;
     },
   },
 
