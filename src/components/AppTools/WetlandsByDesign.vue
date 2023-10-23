@@ -104,7 +104,11 @@
           <div>
             <q-expansion-item
               default-opened
-              label="Watershed Comparison Services:"
+              :label="
+                this.serviceType == 'nos'
+                  ? 'Watershed Comparison Services:'
+                  : 'Watershed Comparison:'
+              "
               style="background: rgb(237 237 237)"
               dense
               v-if="this.showServices == true || this.showNumServices == true"
@@ -251,8 +255,59 @@
               />
             </q-expansion-item>
             <q-expansion-item
+              v-if="this.showCombined == true"
+              label="Range of Service:"
+              style="background: rgb(237 237 237)"
+              default-opened
+              hide-expand-icon
+              dense
+            >
+              <div
+                style="padding-left: 15px; background-color: white; padding-top: 10px"
+              >
+                <div
+                  style="margin: auto; width: max-content; display: block; padding-bottom: 10px"
+                >
+                  <strong>Currently Selected: {{ this.option }}</strong>
+                </div>
+                <p v-if="this.countOfServices != 0">
+                  Combined Services:
+                  <strong>{{ this.countOfServices }}</strong>
+                </p>
+
+                <p v-if="this.floodAbatement != 0">
+                  Flood Abatement:
+                  <strong>{{ this.floodAbatement }}</strong>
+                </p>
+
+                <p v-if="this.fishAquaticHabitat != 0">
+                  Fish and Aquatic Habitat:
+                  <strong>{{ this.fishAquaticHabitat }}</strong>
+                </p>
+
+                <p v-if="this.sedimentRetention != 0">
+                  Sediment Retention:
+                  <strong>{{ this.sedimentRetention }}</strong>
+                </p>
+
+                <p v-if="this.nitrogenReduction != 0">
+                  Nutrient Transformation:
+                  <strong>{{ this.nitrogenReduction }}</strong>
+                </p>
+
+                <p v-if="this.surfaceWaterSupply != 0">
+                  surfaceWaterSupply:
+                  <strong>{{ this.surfaceWaterSupply }}</strong>
+                </p>
+              </div>
+            </q-expansion-item>
+            <q-expansion-item
               v-if="this.rangeOfService == true"
-              label="Range of Services:"
+              :label="
+                this.serviceType == 'rf'
+                  ? 'Feasibility Comparison:'
+                  : 'Range of Service:'
+              "
               style="background: rgb(237 237 237)"
               default-opened
               dense
@@ -978,6 +1033,9 @@ export default {
     },
     rfData() {
       return this.$store.state.rfData;
+    },
+    showCombined() {
+      return this.$store.state.showCombined;
     },
   },
   methods: {

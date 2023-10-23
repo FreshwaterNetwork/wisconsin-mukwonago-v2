@@ -105,6 +105,7 @@ export default createStore({
     previousSelected: {},
     selectedData: false,
     rfData: false,
+    showCombined: false,
   },
   mutations: {
     //data retrieved from web services
@@ -298,6 +299,9 @@ export default createStore({
     },
     updateRfData(state, val) {
       state.rfData = val;
+    },
+    updateShowCombined(state, val) {
+      state.showCombined = val;
     },
   },
 
