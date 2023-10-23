@@ -2246,6 +2246,7 @@ export default {
                 query = esri.featureLayer.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
+                this.showCombined = true;
 
                 huc = hitGraphic.attributes.WHUC8;
                 this.countOfServices = this.numToLoss(
@@ -2270,6 +2271,7 @@ export default {
                 query = esri.featureLayer.createQuery();
                 objectID = hitGraphic.attributes.OBJECTID;
                 query.where = 'OBJECTID = ' + objectID;
+                this.showCombined = true;
 
                 huc = hitGraphic.attributes.WHUC8;
                 this.countOfServices = this.numToLoss(
@@ -2291,7 +2293,6 @@ export default {
                   hitGraphic.attributes.SurfWat
                 );
               }
-              this.showCombined = true;
               document.getElementById('info').style.visibility = 'visible';
               document.getElementById('huc').innerHTML = huc;
               document.getElementById('name').innerHTML = name + ' - ';
