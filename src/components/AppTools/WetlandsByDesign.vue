@@ -44,7 +44,7 @@
     </div>
     <hr />
     <div class="text-body1 q-pa-sm">
-      <!-- <q-btn-toggle
+      <q-btn-toggle
         spread
         toggle-color="primary"
         v-model="this.projectType"
@@ -52,7 +52,7 @@
           { label: 'New Site', value: 'new' },
           { label: 'Existing Site', value: 'existing' },
         ]"
-      /> -->
+      />
       <!-- New Site -->
       <div v-if="this.projectType === 'new'" class="q-pa-md">
         <span
@@ -79,7 +79,7 @@
                 </q-item-section>
                 <q-btn
                   dense
-                  v-if="ws.desc == 'HUC 6' || ws.desc == 'HUC 8'"
+                  v-if="ws.desc != 'HUC 10'"
                   color="primary"
                   style="margin-top: 4px;"
                   @click="previousHuc(ws.desc, ws.huc)"
@@ -159,6 +159,7 @@
                     :val="option.value"
                     :label="option.label"
                     size="30px"
+                    @update:model-value="this.layerChange = !this.layerchange"
                   />
                   <icon-button
                     v-if="option.visible === false"
@@ -210,10 +211,23 @@
                   </div>
                 </div>
               </div>
+              <div
+                style="background-color: white !important; padding-top: 10px"
+              >
+                <p style="padding-bottom: 10px">Opacity:</p>
+                <q-slider
+                  v-model="this.sliderOpacity"
+                  :min="0.1"
+                  :max="1.0"
+                  :step="0.1"
+                  label-always
+                  color="green-4"
+                />
+              </div>
             </q-expansion-item>
             <q-expansion-item
               label="Wetland Wildlife Habitat:"
-              style="background: rgb(237 237 237)"
+              style="background: rgb(237 237 237);"
               dense
               v-if="this.showNumServices == true"
             >
@@ -246,14 +260,17 @@
                   {{ guild.description }}
                 </div>
               </div>
-              <q-btn
-                id="guild-button"
-                color="primary"
-                dense
-                label="Remove Guild Layer"
-                @click="this.noGuild()"
-              />
             </q-expansion-item>
+
+            <q-btn
+              v-if="this.guild !== ''"
+              style="margin-top: 5px; margin-bottom: 10px;"
+              id="guild-button"
+              color="primary"
+              dense
+              label="Remove Guild Layer"
+              @click="this.noGuild()"
+            />
             <q-expansion-item
               v-if="this.showCombined == true"
               label="Range of Service:"
@@ -270,35 +287,197 @@
                 >
                   <strong>Currently Selected: {{ this.option }}</strong>
                 </div>
-                <p v-if="this.countOfServices != 0">
+                <div
+                  v-if="this.countOfServices != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(0, 109, 44); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(165, 15, 21); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.countOfServices == 'Most Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(44, 162, 95); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(222, 45, 38); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.countOfServices == 'Moderate Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(102, 194, 164); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(251, 106, 74); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.countOfServices == 'Least Loss'"
+                  ></div>
                   Combined Services:
                   <strong>{{ this.countOfServices }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.floodAbatement != 0">
+                <div
+                  v-if="this.floodAbatement != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(0, 109, 44); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(165, 15, 21); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.floodAbatement == 'Most Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(44, 162, 95); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(222, 45, 38); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.floodAbatement == 'Moderate Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(102, 194, 164); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(251, 106, 74); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.floodAbatement == 'Least Loss'"
+                  ></div>
                   Flood Abatement:
                   <strong>{{ this.floodAbatement }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.fishAquaticHabitat != 0">
+                <div
+                  v-if="this.fishAquaticHabitat != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(0, 109, 44); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(165, 15, 21); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.fishAquaticHabitat == 'Most Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(44, 162, 95); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(222, 45, 38); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.fishAquaticHabitat == 'Moderate Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(102, 194, 164); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(251, 106, 74); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.fishAquaticHabitat == 'Least Loss'"
+                  ></div>
                   Fish and Aquatic Habitat:
                   <strong>{{ this.fishAquaticHabitat }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.sedimentRetention != 0">
+                <div
+                  v-if="this.sedimentRetention != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(0, 109, 44); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(165, 15, 21); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.sedimentRetention == 'Most Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(44, 162, 95); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(222, 45, 38); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.sedimentRetention == 'Moderate Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(102, 194, 164); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(251, 106, 74); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.sedimentRetention == 'Least Loss'"
+                  ></div>
                   Sediment Retention:
                   <strong>{{ this.sedimentRetention }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.nitrogenReduction != 0">
+                <div
+                  v-if="this.nitrogenReduction != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(0, 109, 44); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(165, 15, 21); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.nitrogenReduction == 'Most Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(44, 162, 95); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(222, 45, 38); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.nitrogenReduction == 'Moderate Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(102, 194, 164); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(251, 106, 74); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.nitrogenReduction == 'Least Loss'"
+                  ></div>
                   Nutrient Transformation:
                   <strong>{{ this.nitrogenReduction }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.surfaceWaterSupply != 0">
-                  surfaceWaterSupply:
+                <div
+                  v-if="this.surfaceWaterSupply != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(0, 109, 44); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(165, 15, 21); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.surfaceWaterSupply == 'Most Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(44, 162, 95); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(222, 45, 38); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.surfaceWaterSupply == 'Moderate Loss'"
+                  ></div>
+                  <div
+                    :style="
+                      this.huc6Squares == true
+                        ? 'background-color: rgb(102, 194, 164); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                        : 'background-color: rgb(251, 106, 74); border: 1px solid black; border-radius: 0; width: 20px; height: 20px; display: inline-flex;'
+                    "
+                    v-if="this.surfaceWaterSupply == 'Least Loss'"
+                  ></div>
+                  Surface Water Supply:
                   <strong>{{ this.surfaceWaterSupply }}</strong>
-                </p>
+                </div>
               </div>
             </q-expansion-item>
             <q-expansion-item
@@ -324,53 +503,440 @@
                   Wetland Area: <strong>{{ this.watershedAcres }} acres</strong>
                 </div>
 
-                <p v-if="this.countOfServices != 0">
+                <div
+                  v-if="this.countOfServices != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.countOfServices == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.countOfServices == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.countOfServices == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.countOfServices == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Count of Services ≥ High:
                   <strong>{{ this.countOfServices }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.floodAbatement != 0">
+                <div
+                  v-if="this.floodAbatement != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.floodAbatement == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.floodAbatement == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.floodAbatement == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.floodAbatement == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Flood Abatement: <strong> {{ this.floodAbatement }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.fishAquaticHabitat != 0">
+                <div
+                  v-if="this.fishAquaticHabitat != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.fishAquaticHabitat == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.fishAquaticHabitat == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.fishAquaticHabitat == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.fishAquaticHabitat == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Fish and Aquatic Habitat:
                   <strong> {{ this.fishAquaticHabitat }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.phosphorousRetention != 0">
+                <div
+                  v-if="this.phosphorousRetention != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.phosphorousRetention == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.phosphorousRetention == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.phosphorousRetention == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.phosphorousRetention == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Phosphorous Retention:
                   <strong> {{ this.phosphorousRetention }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.sedimentRetention != 0">
+                <div
+                  v-if="this.sedimentRetention != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.sedimentRetention == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.sedimentRetention == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.sedimentRetention == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.sedimentRetention == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Sediment Retention:
                   <strong> {{ this.sedimentRetention }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.nitrogenReduction != 0">
+                <div
+                  v-if="this.nitrogenReduction != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.nitrogenReduction == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.nitrogenReduction == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.nitrogenReduction == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.nitrogenReduction == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Nitrogen Reduction:
                   <strong> {{ this.nitrogenReduction }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.surfaceWaterSupply != 0">
+                <div
+                  v-if="this.surfaceWaterSupply != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.surfaceWaterSupply == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.surfaceWaterSupply == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.surfaceWaterSupply == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.surfaceWaterSupply == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Surface Water Supply:
                   <strong> {{ this.surfaceWaterSupply }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.shorelineProtection != 0">
+                <div
+                  v-if="this.shorelineProtection != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.shorelineProtection == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.shorelineProtection == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.shorelineProtection == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.shorelineProtection == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Shoreline Protection:
                   <strong> {{ this.shorelineProtection }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.carbonStorage != 0">
+                <div v-if="this.carbonStorage != 0" style="margin-bottom: 15px">
+                  <div
+                    class="range-square"
+                    v-if="this.carbonStorage == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.carbonStorage == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.carbonStorage == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.carbonStorage == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Carbon Storage: <strong> {{ this.carbonStorage }}</strong>
-                </p>
+                </div>
 
-                <p v-if="this.floristicIntegrity != 0">
+                <div
+                  v-if="this.floristicIntegrity != 0"
+                  style="margin-bottom: 15px"
+                >
+                  <div
+                    class="range-square"
+                    v-if="this.floristicIntegrity == 'Very High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(0, 109, 44)'
+                        : 'background-color: rgb(165, 15, 21)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.floristicIntegrity == 'High'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(49, 163, 84)'
+                        : 'background-color:rgb(222, 45, 38)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.floristicIntegrity == 'Moderate'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(116, 196, 118)'
+                        : 'background-color:rgb(251, 106, 74)'
+                    "
+                  ></div>
+                  <div
+                    class="range-square"
+                    v-if="this.floristicIntegrity == 'Not Applicable'"
+                    :style="
+                      this.selectedData == true
+                        ? 'background-color: rgb(237, 248, 233)'
+                        : 'background-color:rgb(254, 229, 217)'
+                    "
+                  ></div>
                   Floristic Integrity:
                   <strong> {{ this.floristicIntegrity }}</strong>
-                </p>
+                </div>
               </div>
               <div
                 v-if="this.serviceType == 'rf'"
@@ -400,7 +966,7 @@
                 <div
                   v-if="this.loadingComplete == true && this.loadingRf == false"
                 >
-                  <div v-if="this.overallFeas">
+                  <div v-if="this.overallFeas !== ''">
                     Overall Feasibility:
                     <div
                       v-if="this.overallFeas <= -1"
@@ -424,7 +990,7 @@
                     ></div>
                   </div>
 
-                  <div v-if="this.landUseCons">
+                  <div v-if="this.landUseCons !== ''">
                     Land Use Considerations:
                     <div id="land-less-one" v-if="this.landUseCons < 1"></div>
                     <div id="land-one" v-if="this.landUseCons == 1"></div>
@@ -432,7 +998,7 @@
                     <div id="land-more-two" v-if="this.landUseCons > 2"></div>
                   </div>
 
-                  <div v-if="this.invasiveSpeciesCons">
+                  <div v-if="this.invasiveSpeciesCons !== ''">
                     Invasive Species Considerations:
                     <div
                       id="invasive-less-two"
@@ -448,7 +1014,31 @@
                     ></div>
                     <div
                       id="invasive-more-zero"
-                      v-if="this.invasiveSpeciesCons > 0"
+                      v-if="this.invasiveSpeciesCons >= 0"
+                    ></div>
+                  </div>
+
+                  <div v-if="this.landOwnerCons !== ''">
+                    Land Ownership Considerations:
+                    <div
+                      v-if="this.landOwnerCons <= -1"
+                      id="overall-feas-negative"
+                    ></div>
+                    <div
+                      v-if="this.landOwnerCons == 0"
+                      id="overall-feas-zero"
+                    ></div>
+                    <div
+                      v-if="this.landOwnerCons == 1"
+                      id="overall-feas-one"
+                    ></div>
+                    <div
+                      v-if="this.landOwnerCons == 2"
+                      id="overall-feas-two"
+                    ></div>
+                    <div
+                      v-if="this.landOwnerCons >= 3"
+                      id="overall-feas-three"
                     ></div>
                   </div>
                 </div>
@@ -457,34 +1047,33 @@
           </div>
         </div>
       </div>
-      <q-btn
-        color="negative"
-        v-if="firstSelected == true"
-        dense
-        style="margin: auto; width: max-content; display: block;"
-        @click="this.$router.go()"
-        >Start Over</q-btn
-      >
       <!-- Existing Site -->
-      <!-- <div v-if="this.projectType === 'existing'">
-        <div style="display: flex;">
+      <div v-if="this.projectType === 'existing'">
+        <div style="display: flex; margin: 10px 10px 10px 10px">
           <q-input
             outlined
-            v-model="locationValue"
+            v-model="this.wetlandLocation"
             for="locationID"
             label="Location or Address"
             style="display:block; margin:auto 5px auto auto;"
-            @input="locationValue"
           />
           <q-btn
             round
             color="primary"
             icon="search"
             style="margin: auto auto auto 5px"
-            @click="updateLocationValue"
+            @click="searchWetlandLocation()"
           />
         </div>
-      </div> -->
+      </div>
+      <q-btn
+        color="negative"
+        v-if="firstSelected == true && this.projectType == 'new'"
+        dense
+        style="margin: auto; width: max-content; display: block;"
+        @click="this.$router.go()"
+        >Start Over</q-btn
+      >
     </div>
   </div>
 </template>
@@ -725,6 +1314,13 @@ export default {
             'The presence of invasive plants, or proximity to an invasive plant seed source, reduces the habitat quality of wetland restorations and may increase long-term management needs. Four common invaders are considered: reed canary grass, Phragmites, cattails, and invasive shrubs (buckthorn or honeysuckle).',
           visible: false,
           id: 56,
+        },
+        {
+          label: 'Land Ownership Considerations',
+          value: 'Land Ownership Considerations',
+          description: '',
+          visible: false,
+          id: 70,
         },
       ],
       huc6: '',
@@ -1001,6 +1597,14 @@ export default {
         this.$store.commit('updateinvasiveSpeciesCons', value);
       },
     },
+    landOwnerCons: {
+      get() {
+        return this.$store.state.landOwnerCons;
+      },
+      set(value) {
+        this.$store.commit('updateLandOwnerCons', value);
+      },
+    },
     loadingRf: {
       get() {
         return this.$store.state.loadingRf;
@@ -1037,6 +1641,62 @@ export default {
     showCombined() {
       return this.$store.state.showCombined;
     },
+    huc6Squares: {
+      get() {
+        return this.$store.state.huc6Squares;
+      },
+      set(value) {
+        this.$store.commit('updateHuc6Squares', value);
+      },
+    },
+    huc8Squares: {
+      get() {
+        return this.$store.state.huc8Squares;
+      },
+      set(value) {
+        this.$store.commit('updateHuc8Squares', value);
+      },
+    },
+    sliderOpacity: {
+      get() {
+        return this.$store.state.sliderOpacity;
+      },
+      set(value) {
+        this.$store.commit('updateSliderOpacity', value);
+      },
+    },
+    rfSelectLayer: {
+      get() {
+        return this.$store.state.rfSelectLayer;
+      },
+      set(value) {
+        this.$store.commit('updateRfSelectLayer', value);
+      },
+    },
+    layerChange: {
+      get() {
+        return this.$store.state.layerChange;
+      },
+      set(value) {
+        this.$store.commit('updateLayerChange', value);
+      },
+    },
+    wetlandLocation: {
+      get() {
+        return this.$store.state.wetlandLocation;
+      },
+      set(value) {
+        this.$store.commit('updateWetlandLocation', value);
+      },
+    },
+    locationSearch: {
+      get() {
+        return this.$store.state.locationSearch;
+      },
+      set(value) {
+        this.$store.commit('updateLocationSearch', value);
+      },
+    },
   },
   methods: {
     noGuild() {
@@ -1058,6 +1718,7 @@ export default {
     },
     previousHuc(huc, num) {
       this.previousSelected = { hucLevel: huc, hucNum: num };
+      console.log(this.wetlandWatersheds);
     },
     numToRange(num) {
       if (num == 0) {
@@ -1070,40 +1731,56 @@ export default {
         return 'Moderate';
       }
     },
+    searchWetlandLocation() {
+      this.locationSearch = !this.locationSearch;
+    },
   },
   watch: {
+    serviceType() {
+      if (this.serviceType == 'nos') {
+        this.serviceOptions.forEach((option) => {
+          if (option.label == this.serviceOption) {
+            this.serviceLayer = option.nosId;
+            this.rfLayer = option.rfId;
+          }
+        });
+      } else if (this.serviceType == 'rf') {
+        this.rfOptions.forEach((option) => {
+          if (option.label === this.rfOption) {
+            this.rfSelectLayer = option.id;
+          }
+        });
+      }
+    },
     rfOption() {
-      this.rfLayer = 0;
-      // this.overallFeas = 0;
-      // this.landUseCons = 0;
-      // this.invasiveSpeciesCons = 0;
-
+      this.rfSelectLayer = 0;
       this.wetlandIdString = '';
       this.watershedAcres = 0;
 
       this.rfOptions.forEach((option) => {
         if (option.label === this.rfOption) {
-          this.rfLayer = option.id;
+          this.rfSelectLayer = option.id;
         }
       });
     },
     serviceOption() {
-      this.serviceLayer = 0;
+      // this.serviceLayer = 0;
+      // this.rfLayer = 0;
+      // this.layerChange = !this.layerChange;
 
       this.serviceOptions.forEach((option) => {
         if (option.label == this.serviceOption) {
           // if (this.serviceType === 'nos') {
           //   this.serviceLayer = option.nosId;
           // } else if (this.serviceType === 'rf') {
-          this.serviceLayer = option.rfId;
+          this.serviceLayer = option.nosId;
+          this.rfLayer = option.rfId;
           // }
         }
       });
     },
     guild() {
       this.guildOptions.forEach((option) => {
-        console.log(option.value);
-        console.log(this.guild);
         if (option.value == this.guild) {
           this.guildLayer = option.id;
         }
@@ -1244,5 +1921,12 @@ export default {
   border-radius: 0 !important;
   width: 20px;
   height: 20px;
+}
+.range-square {
+  border: 1px solid black;
+  border-radius: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
 }
 </style>
