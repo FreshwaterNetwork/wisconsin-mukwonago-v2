@@ -80,8 +80,8 @@ export default createStore({
     hucHover: false,
     rangeOfService: false,
     optionLayers: { id8: 30, id10: 31, id12: 32 },
-    rfLayer: 54,
-    serviceLayer: 16,
+    rfLayer: 16,
+    serviceLayer: 6,
     removeGuild: false,
     watershedRange: [],
     countOfServices: 0,
@@ -99,6 +99,7 @@ export default createStore({
     overallFeas: 0,
     landUseCons: 0,
     invasiveSpeciesCons: 0,
+    landOwnerCons: 0,
     loadingRf: false,
     loadingComplete: false,
     firstSelected: false,
@@ -106,6 +107,13 @@ export default createStore({
     selectedData: false,
     rfData: false,
     showCombined: false,
+    huc6Squares: false,
+    huc8Squares: false,
+    sliderOpacity: 0.7,
+    rfSelectLayer: 54,
+    layerChange: false,
+    wetlandLocation: '',
+    locationSearch: false,
   },
   mutations: {
     //data retrieved from web services
@@ -282,6 +290,9 @@ export default createStore({
     updateInvasiveSpeciesCons(state, val) {
       state.invasiveSpeciesCons = val;
     },
+    updateLandOwnerCons(state, val) {
+      state.landOwnerCons = val;
+    },
     updateLoadingRf(state, val) {
       state.loadingRf = val;
     },
@@ -302,6 +313,27 @@ export default createStore({
     },
     updateShowCombined(state, val) {
       state.showCombined = val;
+    },
+    updateHuc6Squares(state, val) {
+      state.huc6Squares = val;
+    },
+    updateHuc8Squares(state, val) {
+      state.huc8Squares = val;
+    },
+    updateSliderOpacity(state, val) {
+      state.sliderOpacity = val;
+    },
+    updateRfSelectLayer(state, val) {
+      state.rfSelectLayer = val;
+    },
+    updateLayerChange(state, val) {
+      state.layerChange = val;
+    },
+    updateWetlandLocation(state, val) {
+      state.wetlandLocation = val;
+    },
+    updateLocationSearch(state, val) {
+      state.locationSearch = val;
     },
   },
 
