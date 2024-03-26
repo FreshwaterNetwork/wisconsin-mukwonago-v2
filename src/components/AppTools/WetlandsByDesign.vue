@@ -1,7 +1,9 @@
 <template>
   <div>
-    <div class="text-h6 text-weight-medium text-center">
-      <span>Wetlands and Watersheds Explorer</span>
+    <div>
+      <p class="text-h6 text-weight-medium text-center q-pb-none q-mb-none">
+        Wetlands and Watersheds Explorer
+      </p>
       <!-- <q-btn
         icon="fas fa-bars"
         color="primary"
@@ -20,7 +22,7 @@
           </q-list>
         </q-menu> -->
       <!-- </q-btn> -->
-      <icon-button
+      <!-- <icon-button
         v-if="this.appInfo === false"
         type="info"
         method="show-info"
@@ -33,14 +35,40 @@
         method="hide-info"
         @hide-info="this.appInfo = !this.appInfo"
         style="margin-left: 5px; width: 20px; height: 20px;"
-      ></icon-button>
-      <p v-if="this.appInfo == true">
-        <a
-          href="https://maps.freshwaternetwork.org/wisconsin/plugins/wetlands-watershed-explorer/assets/WetlandsByDesign_FinalReport.pdf"
-          target="_blank"
-          >View Report</a
+      ></icon-button> -->
+      <!-- v-if appinfo = true -->
+      <div class="row justify-between">
+        <p class="q-pb-none q-mb-none" style="font-size: small;">
+          <a
+            class="header-link"
+            href="https://maps.freshwaternetwork.org/wisconsin/plugins/wetlands-watershed-explorer/assets/WetlandsByDesign_FinalReport.pdf"
+            target="_blank"
+            style=" text-decoration: none !important;"
+            >View Report</a
+          >
+        </p>
+        <p
+          class="q-pb-none q-mb-none"
+          style="font-size: small;"
+          v-if="this.serviceType == 'rf'"
         >
-      </p>
+          <a
+            class="header-link"
+            href="WbD_PRW_feasibility_guidance-012024.pdf"
+            target="_blank"
+            style=" text-decoration: none !important;"
+            >PRW Feasibility Guidance</a
+          >
+        </p>
+        <p
+          class="header-link q-pb-none q-mb-none"
+          style="font-size: small;"
+          @click="beginDownload(this.wetlandWatersheds[2].huc)"
+          v-if="this.startDownload == true"
+        >
+          Download Data
+        </p>
+      </div>
     </div>
     <hr />
     <div class="text-body1 q-pa-sm">
@@ -49,8 +77,8 @@
         toggle-color="primary"
         v-model="this.projectType"
         :options="[
-          { label: 'New Site', value: 'new' },
-          { label: 'Existing Site', value: 'existing' },
+          { label: 'Search for a New Site', value: 'new' },
+          { label: 'Evaluate a Known Site', value: 'existing' },
         ]"
       />
       <!-- New Site -->
@@ -259,6 +287,19 @@
                 <div class="option-description" v-show="guild.visible">
                   {{ guild.description }}
                 </div>
+              </div>
+              <div
+                style="background-color: white !important; padding-top: 10px"
+              >
+                <p style="padding-bottom: 10px">Opacity:</p>
+                <q-slider
+                  v-model="this.guildOpacity"
+                  :min="0.1"
+                  :max="1.0"
+                  :step="0.1"
+                  label-always
+                  color="green-4"
+                />
               </div>
             </q-expansion-item>
 
@@ -1318,7 +1359,8 @@ export default {
         {
           label: 'Land Ownership Considerations',
           value: 'Land Ownership Considerations',
-          description: '',
+          description:
+            'The size of the potentially restorable wetland, its shape and complexity, adjacency to other public properties, and complexity of ownership of the restoration area are ownership considerations that affect restoration feasibility. ',
           visible: false,
           id: 70,
         },
@@ -1665,6 +1707,14 @@ export default {
         this.$store.commit('updateSliderOpacity', value);
       },
     },
+    guildOpacity: {
+      get() {
+        return this.$store.state.guildOpacity;
+      },
+      set(value) {
+        this.$store.commit('updateGuildOpacity', value);
+      },
+    },
     rfSelectLayer: {
       get() {
         return this.$store.state.rfSelectLayer;
@@ -1695,6 +1745,14 @@ export default {
       },
       set(value) {
         this.$store.commit('updateLocationSearch', value);
+      },
+    },
+    startDownload: {
+      get() {
+        return this.$store.state.startDownload;
+      },
+      set(value) {
+        this.$store.commit('updateStartDownload', value);
       },
     },
   },
@@ -1733,6 +1791,23 @@ export default {
     },
     searchWetlandLocation() {
       this.locationSearch = !this.locationSearch;
+    },
+    beginDownload(val) {
+      window.open(
+        'https://nascience.s3-us-west-1.amazonaws.com/apps/wisconsin_wbd_data/huc_6_download_packages/' +
+          val.toString() +
+          '.zip',
+        '_parent'
+      );
+
+      // let url =
+      //   'https://nascience.s3-us-west-1.amazonaws.com/apps/wisconsin_wbd_data/huc_6_download_packages/' +
+      //   val.toString() +
+      //   '.zip';
+      // ('_parent');
+
+      console.log(val);
+      // console.log(url);
     },
   },
   watch: {
@@ -1928,5 +2003,12 @@ export default {
   width: 20px;
   height: 20px;
   display: inline-flex;
+}
+.header-link {
+  color: black;
+}
+.header-link:hover {
+  color: rgb(0, 162, 255);
+  cursor: pointer;
 }
 </style>

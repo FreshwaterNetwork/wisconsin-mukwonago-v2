@@ -110,10 +110,12 @@ export default createStore({
     huc6Squares: false,
     huc8Squares: false,
     sliderOpacity: 0.7,
+    guildOpacity: 0.7,
     rfSelectLayer: 54,
     layerChange: false,
     wetlandLocation: '',
     locationSearch: false,
+    startDownload: false,
   },
   mutations: {
     //data retrieved from web services
@@ -323,6 +325,9 @@ export default createStore({
     updateSliderOpacity(state, val) {
       state.sliderOpacity = val;
     },
+    updateGuildOpacity(state, val) {
+      state.guildOpacity = val;
+    },
     updateRfSelectLayer(state, val) {
       state.rfSelectLayer = val;
     },
@@ -334,6 +339,9 @@ export default createStore({
     },
     updateLocationSearch(state, val) {
       state.locationSearch = val;
+    },
+    updateStartDownload(state, val) {
+      state.startDownload = val;
     },
   },
 

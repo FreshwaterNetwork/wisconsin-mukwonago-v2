@@ -57,6 +57,7 @@ import Sketch from '@arcgis/core/widgets/Sketch';
 import Point from '@arcgis/core/geometry/Point.js';
 import SimpleMarkerSymbol from '@arcgis/core/symbols/SimpleMarkerSymbol.js';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer.js';
+import Extent from '@arcgis/core/geometry/Extent.js';
 // import Polygon from '@arcgis/core/geometry/Polygon.js';
 // import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
 // import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol.js';
@@ -571,6 +572,14 @@ export default {
         this.$store.commit('updateSliderOpacity', value);
       },
     },
+    guildOpacity: {
+      get() {
+        return this.$store.state.guildOpacity;
+      },
+      set(value) {
+        this.$store.commit('updateGuildOpacity', value);
+      },
+    },
     rfSelectLayer: {
       get() {
         return this.$store.state.rfSelectLayer;
@@ -601,6 +610,14 @@ export default {
       },
       set(value) {
         this.$store.commit('updateLocationSearch', value);
+      },
+    },
+    startDownload: {
+      get() {
+        return this.$store.state.startDownload;
+      },
+      set(value) {
+        this.$store.commit('updateStartDownload', value);
       },
     },
   },
@@ -673,6 +690,9 @@ export default {
       this.removeGuild = false;
 
       esri.mapImage.findSublayerById(this.guildLayer).visible = true;
+      esri.mapImage.findSublayerById(
+        this.guildLayer
+      ).opacity = this.guildOpacity;
     },
     serviceLayer() {
       this.removeLayer();
@@ -762,6 +782,11 @@ export default {
       esri.mapImage.sublayers.forEach((layer) => {
         layer.opacity = this.sliderOpacity;
       });
+    },
+    guildOpacity() {
+      esri.mapImage.findSublayerById(
+        this.guildLayer
+      ).opacity = this.guildOpacity;
     },
     projectType() {
       if (this.projectType == 'existing') {
@@ -1128,37 +1153,37 @@ export default {
               id: 48,
               title: 'Forest Interior Birds Guild',
               visible: false,
-              opacity: this.sliderOpacity,
+              opacity: this.guildOpacity,
             },
             {
               id: 49,
               title: 'Open Water Birds Guild',
               visible: false,
-              opacity: this.sliderOpacity,
+              opacity: this.guildOpacity,
             },
             {
               id: 50,
               title: 'Shallow Marsh Birds Guild',
               visible: false,
-              opacity: this.sliderOpacity,
+              opacity: this.guildOpacity,
             },
             {
               id: 51,
               title: 'Wet Shrub Birds Guild',
               visible: false,
-              opacity: this.sliderOpacity,
+              opacity: this.guildOpacity,
             },
             {
               id: 52,
               title: 'All Guilds',
               visible: false,
-              opacity: this.sliderOpacity,
+              opacity: this.guildOpacity,
             },
             {
               id: 53,
               title: 'All-Guild Restoration Opportunities',
               visible: false,
-              opacity: this.sliderOpacity,
+              opacity: this.guildOpacity,
             },
             {
               id: 57,
@@ -2435,17 +2460,23 @@ export default {
       //   esri.featureLayer.destroy();
       // }
 
-      esri.mapImage.findSublayerById(1).visible = false;
+      // esri.mapImage.findSublayerById(1).visible = false;
       esri.map.remove(huc6ws);
       esri.map.remove(esri.featureLayer);
 
       let huc6 = {};
       let huc8 = {};
       let huc10 = {};
+      let huc6name = '';
+      let huc8name = '';
       let query;
+      let queryb;
+      let queryc;
       let geom;
       let results;
       let point;
+      let layerExtent = new Extent({});
+
       _this.projectType = 'new';
       _this.h6 = true;
       _this.h8 = true;
@@ -2465,19 +2496,36 @@ export default {
         query = huc10ws.createQuery(point);
         query.geometry = point;
 
+        queryb = huc6ws.createQuery(point);
+        queryb.geometry = point;
+        queryc = huc8ws.createQuery(point);
+        queryc.geometry = point;
+
         _this.showServices = false;
         _this.showNumServices = true;
+
+        huc6ws.queryFeatures(queryb).then(function(result) {
+          let feature = result.features[0].attributes;
+
+          huc6name = feature.name;
+        });
+
+        huc8ws.queryFeatures(queryc).then(function(result) {
+          let feature = result.features[0].attributes;
+
+          huc8name = feature.name;
+        });
 
         huc10ws.queryFeatures(query).then(function(result) {
           let feature = result.features[0].attributes;
           huc6 = {
             desc: 'HUC 6',
-            name: feature.name,
+            name: huc6name,
             huc: feature.WHUC6,
           };
           huc8 = {
             desc: 'HUC 8',
-            name: feature.name,
+            name: huc8name,
             huc: feature.WHUC8,
           };
           huc10 = {
@@ -2485,6 +2533,8 @@ export default {
             name: feature.name,
             huc: feature.WHUC10,
           };
+          layerExtent = result.features[0].geometry.extent.extent;
+
           _this.selectedHuc = feature.WHUC10;
           _this.wetlandWatersheds.push(huc6);
           _this.wetlandWatersheds.push(huc8);
@@ -2526,15 +2576,15 @@ export default {
           esri.mapImage.findSublayerById(0).visible = true;
           esri.mapImage.findSublayerById(_this.serviceLayer).visible = true;
           esri.mapImage.findSublayerById(_this.rfLayer).visible = true;
+          esri.mapView.goTo({ target: layerExtent });
         });
-
-        esri.mapView.goTo({ center: point, zoom: 9 });
 
         // _this.h6 = false;
         // _this.h8 = false;
         // _this.h10 = false;
         _this.h12 = true;
         _this.showCombined = false;
+        _this.startDownload = true;
         // _this.locationSearch = false;
       });
     }
@@ -2781,6 +2831,7 @@ export default {
               _this.h12 = true;
               _this.showServices = false;
               _this.showCombined = true;
+              _this.startDownload = true;
               _this.showNumServices = true;
             }
           } else if (_this.h12 == true) {
