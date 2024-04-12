@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: '/',
+  publicPath: "/wisconsin/",
   configureWebpack: {
     module: {
       rules: [
@@ -13,15 +13,15 @@ module.exports = {
             ],
           },
           use: {
-            loader: 'babel-loader',
+            loader: "babel-loader",
             options: {
               plugins: [
                 // these are required by Webpack 4 since @arcgis/core@4.24
                 [
-                  '@babel/plugin-proposal-nullish-coalescing-operator',
+                  "@babel/plugin-proposal-nullish-coalescing-operator",
                   { loose: true },
                 ],
-                ['@babel/plugin-proposal-optional-chaining', { loose: true }],
+                ["@babel/plugin-proposal-optional-chaining", { loose: true }],
               ],
             },
           },
