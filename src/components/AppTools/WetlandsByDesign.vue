@@ -41,7 +41,7 @@
         <p class="q-pb-none q-mb-none" style="font-size: small;">
           <a
             class="header-link"
-            href="https://maps.freshwaternetwork.org/wisconsin/plugins/wetlands-watershed-explorer/assets/WetlandsByDesign_FinalReport.pdf"
+            href="WetlandsByDesign_FinalReport.pdf"
             target="_blank"
             style=" text-decoration: none !important;"
             >View Report</a

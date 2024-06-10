@@ -2276,7 +2276,7 @@ export default {
     esri.rfSelectedWatershed = new FeatureLayer({
       url:
         'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/wi_wetlands_by_design/MapServer/' +
-        this.rfSelectLayer,
+        71,
       title: 'Wetland Feasibility - ' + this.rfOption,
       opacity: this.sliderOpacity,
       outFields: ['*'],
@@ -3008,6 +3008,12 @@ export default {
                       _this.landUseCons = feat.Num_Val;
                       _this.invasiveSpeciesCons = feat.IS_Num;
                       _this.landOwnerCons = feat.LO_Total;
+
+                      console.log(_this.overallFeas);
+                      console.log(esri.rfSelectedWatershed);
+                      console.log(potentialId);
+                      console.log(esri.rfWatershed);
+                      console.log(result);
                     });
                 });
             }
@@ -3680,6 +3686,8 @@ export default {
         "WHUC10 = '" + this.selectedHuc + "'";
 
       esri.mapImage.findSublayerById(this.rfSelectLayer).visible = true;
+
+      console.log(esri.mapImage.findSublayerById(this.rfSelectLayer));
     },
 
     updateNosLayer() {
