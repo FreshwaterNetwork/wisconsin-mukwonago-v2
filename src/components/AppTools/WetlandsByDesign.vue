@@ -1062,25 +1062,29 @@
                   <div v-if="this.landOwnerCons !== ''">
                     Land Ownership Considerations:
                     <div
-                      v-if="this.landOwnerCons <= -1"
-                      id="overall-feas-negative"
+                      v-if="this.landOwnerCons <= 0"
+                      id="landowner-cons-zero"
                     ></div>
                     <div
-                      v-if="this.landOwnerCons == 0"
-                      id="overall-feas-zero"
+                      v-if="
+                        this.landOwnerCons == 1 ||
+                          this.landOwnerCons == 2 ||
+                          this.landOwnerCons == 3
+                      "
+                      id="landowner-cons-three"
                     ></div>
                     <div
-                      v-if="this.landOwnerCons == 1"
-                      id="overall-feas-one"
+                      v-if="this.landOwnerCons == 4 || this.landOwnerCons == 5"
+                      id="landowner-cons-five"
                     ></div>
                     <div
-                      v-if="this.landOwnerCons == 2"
-                      id="overall-feas-two"
+                      v-if="this.landOwnerCons >= 6"
+                      id="landowner-cons-seven"
                     ></div>
-                    <div
-                      v-if="this.landOwnerCons >= 3"
+                    <!-- <div
+                      v-if="this.landOwnerCons >= 6"
                       id="overall-feas-three"
-                    ></div>
+                    ></div> -->
                   </div>
                 </div>
               </div>
@@ -1992,6 +1996,38 @@ export default {
 #invasive-more-zero {
   display: inline-block;
   background-color: rgb(203, 24, 29);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#landowner-cons-zero {
+  display: inline-block;
+  background-color: rgb(254, 242, 227);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#landowner-cons-three {
+  display: inline-block;
+  background-color: rgb(240, 197, 173);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#landowner-cons-five {
+  display: inline-block;
+  background-color: rgb(225, 146, 129);
+  border: 1px solid black;
+  border-radius: 0 !important;
+  width: 20px;
+  height: 20px;
+}
+#landowner-cons-seven {
+  display: inline-block;
+  background-color: rgb(214, 102, 94);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
