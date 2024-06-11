@@ -1033,7 +1033,7 @@
 
                   <div v-if="this.landUseCons !== ''">
                     Land Use Considerations:
-                    <div id="land-less-one" v-if="this.landUseCons < 1"></div>
+                    <div id="land-less-one" v-if="this.landUseCons <= 0"></div>
                     <div id="land-one" v-if="this.landUseCons == 1"></div>
                     <div id="land-two" v-if="this.landUseCons == 2"></div>
                     <div id="land-more-two" v-if="this.landUseCons > 2"></div>
@@ -1780,7 +1780,6 @@ export default {
     },
     previousHuc(huc, num) {
       this.previousSelected = { hucLevel: huc, hucNum: num };
-      console.log(this.wetlandWatersheds);
     },
     numToRange(num) {
       if (num == 0) {
@@ -1810,7 +1809,6 @@ export default {
       //   '.zip';
       // ('_parent');
 
-      console.log(val);
       // console.log(url);
     },
   },
@@ -1834,7 +1832,7 @@ export default {
     rfOption() {
       this.rfSelectLayer = 0;
       this.wetlandIdString = '';
-      this.watershedAcres = 0;
+      // this.watershedAcres = 0;
 
       this.rfOptions.forEach((option) => {
         if (option.label === this.rfOption) {
@@ -1899,7 +1897,7 @@ export default {
 }
 #overall-feas-negative {
   display: inline-block;
-  background-color: rgb(254, 229, 217);
+  background-color: rgb(254 237 229);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1907,7 +1905,7 @@ export default {
 }
 #overall-feas-zero {
   display: inline-block;
-  background-color: rgb(252, 174, 145);
+  background-color: rgb(253 200 179);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1915,7 +1913,7 @@ export default {
 }
 #overall-feas-one {
   display: inline-block;
-  background-color: rgb(251, 106, 74);
+  background-color: rgb(252 155 134);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1923,7 +1921,7 @@ export default {
 }
 #overall-feas-two {
   display: inline-block;
-  background-color: rgb(222, 45, 38) !important;
+  background-color: rgb(232 116 108) !important;
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1931,7 +1929,7 @@ export default {
 }
 #overall-feas-three {
   display: inline-block;
-  background-color: rgb(165, 15, 21);
+  background-color: rgb(191 97 95);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1939,7 +1937,7 @@ export default {
 }
 #land-less-one {
   display: inline-block;
-  background-color: rgb(254, 229, 217);
+  background-color: rgb(254, 242, 227);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1947,7 +1945,7 @@ export default {
 }
 #land-one {
   display: inline-block;
-  background-color: rgb(252, 174, 145);
+  background-color: rgb(240, 197, 173);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1955,7 +1953,7 @@ export default {
 }
 #land-two {
   display: inline-block;
-  background-color: rgb(251, 106, 74);
+  background-color: rgb(225, 146, 129);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1963,7 +1961,7 @@ export default {
 }
 #land-more-two {
   display: inline-block;
-  background-color: rgb(203, 24, 29);
+  background-color: rgb(214, 102, 94);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1971,7 +1969,7 @@ export default {
 }
 #invasive-less-two {
   display: inline-block;
-  background-color: rgb(254, 229, 217);
+  background-color: rgb(254 237 229);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1979,7 +1977,7 @@ export default {
 }
 #invasive-two {
   display: inline-block;
-  background-color: rgb(252, 174, 145);
+  background-color: rgb(253 200 179);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1987,7 +1985,7 @@ export default {
 }
 #invasive-one {
   display: inline-block;
-  background-color: rgb(251, 106, 74);
+  background-color: rgb(252 155 134);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;
@@ -1995,7 +1993,7 @@ export default {
 }
 #invasive-more-zero {
   display: inline-block;
-  background-color: rgb(203, 24, 29);
+  background-color: rgb(191 97 95);
   border: 1px solid black;
   border-radius: 0 !important;
   width: 20px;

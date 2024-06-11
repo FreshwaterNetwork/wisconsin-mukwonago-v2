@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-snackbar
+    <!-- <v-snackbar
       v-if="updateExists"
       class="q-pa-md"
       bottom
@@ -8,6 +8,7 @@
       :value="updateExists"
       :timeout="0"
       color="primary"
+      v-model="model"
     >
       <span class="text-caption">
         An update is available
@@ -15,7 +16,7 @@
           Update
         </q-btn></span
       >
-    </v-snackbar>
+    </v-snackbar> -->
     <div id="print" class="print-only">
       <the-print></the-print>
     </div>
@@ -107,6 +108,7 @@ export default {
       //for the service worker (pwa update)
       registration: null,
       updateExists: false,
+      model: '',
     };
   },
   computed: {

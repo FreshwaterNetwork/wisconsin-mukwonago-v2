@@ -633,8 +633,6 @@ export default {
       let layerTitle = '';
 
       if (this.addRaster === true) {
-        console.log(this.mapQuery);
-
         esri.mapImage.sublayers.forEach((sub) => {
           layerTitle = sub.title;
           queryTitle = this.mapQuery;
@@ -642,16 +640,13 @@ export default {
 
           if (queryTitle === layerTitle) {
             sub.visible = true;
-            console.log(sub);
           } else {
             sub.visible = false;
           }
         });
       }
       if (this.addRaster === false) {
-        console.log(this.addRaster);
         esri.mapImage.sublayers.forEach((sub) => {
-          console.log(sub.visible);
           sub.visible = false;
         });
       }
@@ -721,8 +716,6 @@ export default {
       esri.mapImage.findSublayerById(this.rfSelectLayer).visible = false;
       esri.map.remove(esri.prwLayer);
       esri.mapView.graphics.removeAll();
-
-      console.log(this.previousSelected);
 
       if (this.previousSelected.hucLevel == 'HUC 6') {
         this.h8 = false;
@@ -2146,7 +2139,6 @@ export default {
               opacity: 1,
               popupTemplate: template,
             });
-            console.log(sublayer.id, layerConfig.fields);
           }
           //if there is no popup push without a template
           else {
@@ -2173,21 +2165,18 @@ export default {
         'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/1',
     });
     let muk_srlLayerView = '';
-    console.log(muk_srlLayerView);
 
     const muk_lakes = new FeatureLayer({
       url:
         'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/2',
     });
     let muk_lakesLayerView = '';
-    console.log(muk_lakesLayerView);
 
     const muk_fens = new FeatureLayer({
       url:
         'https://services2.coastalresilience.org/arcgis/rest/services/Wisconsin/Mukwonago/MapServer/3',
     });
     let muk_fensLayerView = '';
-    console.log(muk_fensLayerView);
 
     const muk_streams = new FeatureLayer({
       url:
@@ -2312,7 +2301,6 @@ export default {
         this.upstreamFeatures.forEach((feat) => {
           if (this.mapQuery != '') {
             if (this.mapQuery.startsWith(feat.qt)) {
-              console.log(feat);
               let lake;
               let srl;
               if (feat.lk != []) {
@@ -2323,7 +2311,6 @@ export default {
 
                   srf_lakes.queryFeatures(queryLakes).then(function(result) {
                     let feature = result.features[0];
-                    console.log(feature.attributes.lake_name);
                     if (highlightLake) {
                       highlightLake.remove();
                       highlightLake = null;
@@ -2338,7 +2325,6 @@ export default {
                 srl = "'" + feat.st + "'";
                 const queryStreams = srf_streams.createQuery();
                 queryStreams.where = 'sfr_name =' + srl;
-                console.log(queryStreams.where);
 
                 srf_streams.queryFeatures(queryStreams).then(function(result) {
                   let feature = result.features[0];
@@ -2349,7 +2335,6 @@ export default {
                   highlightStream = srf_streamsLayerView.highlight(
                     feature.attributes['OBJECTID']
                   );
-                  console.log('streams highlighted');
                 });
               }
             }
@@ -2371,87 +2356,89 @@ export default {
 
     esri.mapView.on('pointer-move', (event) => {
       if (this.wbdApp == true) {
-        this.fixLegendLabels();
+        if (!this.h12) {
+          this.fixLegendLabels();
 
-        let huc;
-        let objectID;
+          let huc;
+          let objectID;
 
-        esri.mapView.hitTest(event).then((e) => {
-          if (e.results.length) {
-            const hitGraphic = e.results[0].graphic;
-            const name = hitGraphic.attributes.name;
-            let query;
+          esri.mapView.hitTest(event).then((e) => {
+            if (e.results.length) {
+              const hitGraphic = e.results[0].graphic;
+              const name = hitGraphic.attributes.name;
+              let query;
 
-            if (name) {
-              if (this.h6 == false) {
-                huc = hitGraphic.attributes.WHUC6;
-                query = esri.featureLayer.createQuery();
-                objectID = hitGraphic.attributes.OBJECTID;
-                query.where = 'OBJECTID = ' + objectID;
-              } else if (this.h6 == true && this.h8 == false) {
-                query = esri.featureLayer.createQuery();
-                objectID = hitGraphic.attributes.OBJECTID;
-                query.where = 'OBJECTID = ' + objectID;
-                this.showCombined = true;
-                this.huc6Squares = true;
-                // this.huc8Squares = false;
+              if (name) {
+                if (this.h6 == false) {
+                  huc = hitGraphic.attributes.WHUC6;
+                  query = esri.featureLayer.createQuery();
+                  objectID = hitGraphic.attributes.OBJECTID;
+                  query.where = 'OBJECTID = ' + objectID;
+                } else if (this.h6 == true && this.h8 == false) {
+                  query = esri.featureLayer.createQuery();
+                  objectID = hitGraphic.attributes.OBJECTID;
+                  query.where = 'OBJECTID = ' + objectID;
+                  this.showCombined = true;
+                  this.huc6Squares = true;
+                  // this.huc8Squares = false;
 
-                huc = hitGraphic.attributes.WHUC8;
-                this.countOfServices = this.numToLoss(
-                  hitGraphic.attributes.AllNeeds
-                );
-                this.floodAbatement = this.numToLoss(
-                  hitGraphic.attributes.FloodAb
-                );
-                this.sedimentRetention = this.numToLoss(
-                  hitGraphic.attributes.SedPhos
-                );
-                this.nitrogenReduction = this.numToLoss(
-                  hitGraphic.attributes.Nitrogen
-                );
-                this.fishAquaticHabitat = this.numToLoss(
-                  hitGraphic.attributes.FishAqua
-                );
-                this.surfaceWaterSupply = this.numToLoss(
-                  hitGraphic.attributes.SurfWat
-                );
-              } else if (this.h8 == true && this.h10 == false) {
-                query = esri.featureLayer.createQuery();
-                objectID = hitGraphic.attributes.OBJECTID;
-                query.where = 'OBJECTID = ' + objectID;
-                this.showCombined = true;
-                this.huc6Squares = false;
-                // this.huc8Squares = true;
+                  huc = hitGraphic.attributes.WHUC8;
+                  this.countOfServices = this.numToLoss(
+                    hitGraphic.attributes.AllNeeds
+                  );
+                  this.floodAbatement = this.numToLoss(
+                    hitGraphic.attributes.FloodAb
+                  );
+                  this.sedimentRetention = this.numToLoss(
+                    hitGraphic.attributes.SedPhos
+                  );
+                  this.nitrogenReduction = this.numToLoss(
+                    hitGraphic.attributes.Nitrogen
+                  );
+                  this.fishAquaticHabitat = this.numToLoss(
+                    hitGraphic.attributes.FishAqua
+                  );
+                  this.surfaceWaterSupply = this.numToLoss(
+                    hitGraphic.attributes.SurfWat
+                  );
+                } else if (this.h8 == true && this.h10 == false) {
+                  query = esri.featureLayer.createQuery();
+                  objectID = hitGraphic.attributes.OBJECTID;
+                  query.where = 'OBJECTID = ' + objectID;
+                  this.showCombined = true;
+                  this.huc6Squares = false;
+                  // this.huc8Squares = true;
 
-                huc = hitGraphic.attributes.WHUC8;
-                this.countOfServices = this.numToLoss(
-                  hitGraphic.attributes.AllNeeds
-                );
-                this.floodAbatement = this.numToLoss(
-                  hitGraphic.attributes.FloodAb
-                );
-                this.sedimentRetention = this.numToLoss(
-                  hitGraphic.attributes.SedPhos
-                );
-                this.nitrogenReduction = this.numToLoss(
-                  hitGraphic.attributes.Nitrogen
-                );
-                this.fishAquaticHabitat = this.numToLoss(
-                  hitGraphic.attributes.FishAqua
-                );
-                this.surfaceWaterSupply = this.numToLoss(
-                  hitGraphic.attributes.SurfWat
-                );
+                  huc = hitGraphic.attributes.WHUC8;
+                  this.countOfServices = this.numToLoss(
+                    hitGraphic.attributes.AllNeeds
+                  );
+                  this.floodAbatement = this.numToLoss(
+                    hitGraphic.attributes.FloodAb
+                  );
+                  this.sedimentRetention = this.numToLoss(
+                    hitGraphic.attributes.SedPhos
+                  );
+                  this.nitrogenReduction = this.numToLoss(
+                    hitGraphic.attributes.Nitrogen
+                  );
+                  this.fishAquaticHabitat = this.numToLoss(
+                    hitGraphic.attributes.FishAqua
+                  );
+                  this.surfaceWaterSupply = this.numToLoss(
+                    hitGraphic.attributes.SurfWat
+                  );
+                }
+                document.getElementById('info').style.visibility = 'visible';
+                document.getElementById('huc').innerHTML = huc;
+                document.getElementById('name').innerHTML = name + ' - ';
+              } else {
+                document.getElementById('info').style.visibility = 'hidden';
+                this.showCombined = false;
               }
-              document.getElementById('info').style.visibility = 'visible';
-              document.getElementById('huc').innerHTML = huc;
-              document.getElementById('name').innerHTML = name + ' - ';
-            } else {
-              document.getElementById('info').style.visibility = 'hidden';
-              this.showCombined = false;
             }
-          }
-        });
+          });
+        }
       }
     });
 
@@ -2565,7 +2552,6 @@ export default {
 
           for (let i = 0; i < a.length; i++) {
             if (a[i].innerHTML == 'ALL_RANK' || a[i].innerHTML == 'AllNeeds') {
-              console.log('found an all rank');
               a[i].innerHTML = '';
             }
           }
@@ -2740,7 +2726,6 @@ export default {
               esri.map.remove(huc8ws);
               esri.mapImage.findSublayerById(2).visible = false;
               esri.mapImage.findSublayerById(3).visible = true;
-              console.log(esri.legend);
 
               query = huc8ws.createQuery(point);
               query.geometry = point;
@@ -2839,7 +2824,7 @@ export default {
 
             _this.rangeOfService = true;
             _this.wetlandIdString = '';
-            _this.watershedAcres = 0;
+            // _this.watershedAcres = 0;
             _this.watershedRange = [];
             let potentialId;
             let boundaryOutline;
@@ -2988,7 +2973,6 @@ export default {
                   esri.mapView.graphics.add(boundaryOutline);
 
                   potentialId = feature.wetlandIdString;
-                  _this.watershedAcres = feature.acres;
 
                   let prwquery = esri.rfQueryLayer.createQuery();
 
@@ -3008,13 +2992,15 @@ export default {
                       _this.landUseCons = feat.Num_Val;
                       _this.invasiveSpeciesCons = feat.IS_Num;
                       _this.landOwnerCons = feat.LO_Total;
-
-                      console.log(_this.overallFeas);
-                      console.log(esri.rfSelectedWatershed);
-                      console.log(potentialId);
-                      console.log(esri.rfWatershed);
-                      console.log(result);
+                      // _this.watershedAcres = feature.acres;
                     });
+
+                  // query rf to get watershed acres
+                  esri.rfWatershed.queryFeatures(query2).then(function(result) {
+                    let feat = result.features[0].attributes;
+
+                    _this.watershedAcres = feat.acres;
+                  });
                 });
             }
           }
@@ -3031,8 +3017,6 @@ export default {
         searchWidg.search(this.locationValue).then((event) => {
           this.searchResults = event.results;
           let geom = this.searchResults[0].results[0].feature.geometry;
-
-          console.log(geom);
 
           if (_this.planType === 'evaluate') {
             // let point;
@@ -3116,9 +3100,6 @@ export default {
               });
             });
 
-            console.log(_this.circleFeatures);
-            console.log(_this.resultsFeatures);
-
             esri.mapView.graphics.removeAll();
             esri.mapView.graphics.add(circleGraphic);
             esri.mapView.graphics.add(pointGraphic);
@@ -3131,8 +3112,6 @@ export default {
 
     _this.$watch('featCounter', () => {
       const rad = document.getElementsByClassName('q-radio');
-
-      console.log(rad);
 
       for (let i = 0; i < rad.length; i++) {
         _this.radios.push(rad[i].ariaLabel);
@@ -3148,8 +3127,6 @@ export default {
 
       for (let i = 0; i < rad.length; i++) {
         rad[i].addEventListener('mouseover', function() {
-          console.log('I am hovering');
-
           if (_this.planType === 'search') {
             let highlightLakes = '';
             let highlightSrl = '';
@@ -3260,9 +3237,7 @@ export default {
       if (event.state === 'complete') {
         // esri.sketch.visible = true;
         esri.mapView.goTo(esri.graphicsLayer.graphics.items[0]);
-        console.log(esri.graphicsLayer);
         esri.graphicsLayer.visible = true;
-        console.log(event);
       }
     });
 
@@ -3273,8 +3248,8 @@ export default {
     esri.mapView.ui.add(esri.measurement, 'top-left');
 
     // create legend widget
-    var numbers = Array.from({ length: 71 }, (_, i) => i);
-    console.log(numbers);
+    // var numbers = Array.from({ length: 71 }, (_, i) => i);
+    // console.log(numbers);
     esri.legend = new Legend({
       view: esri.mapView,
     });
@@ -3485,11 +3460,9 @@ export default {
           );
 
           if (i >= 0) {
-            console.log('finds feature layer');
             esri.map.layers.items[i].visible = true;
           } else {
             //check to see if fl has a popup template defined
-            console.log('creates feature layer');
             let layerList = this.$store.state.config.supportingMapLayers[
               l.mapServiceIndex
             ].popupTemplate;
@@ -3568,11 +3541,9 @@ export default {
         );
 
         if (i >= 0) {
-          console.log('finds feature layer');
           esri.map.layers.items[i].opacity = l.value;
         } else {
           //check to see if fl has a popup template defined
-          console.log('creates feature layer');
           let layerList = this.$store.state.config.supportingMapLayers[
             l.mapServiceIndex
           ].popupTemplate;
@@ -3686,8 +3657,6 @@ export default {
         "WHUC10 = '" + this.selectedHuc + "'";
 
       esri.mapImage.findSublayerById(this.rfSelectLayer).visible = true;
-
-      console.log(esri.mapImage.findSublayerById(this.rfSelectLayer));
     },
 
     updateNosLayer() {
