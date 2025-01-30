@@ -89,6 +89,7 @@ let esri = {
   prwLayer: '',
   rfSelectedWatershed: '',
   rfQueryLayer: '',
+  boundaryOutline: '',
 };
 
 export default {
@@ -696,7 +697,7 @@ export default {
       this.removeLayer();
     },
     serviceType() {
-      esri.mapView.graphics.removeAll();
+      // esri.mapView.graphics.removeAll();
 
       if (this.serviceType == 'nos') {
         this.updateNosLayer();
@@ -797,8 +798,6 @@ export default {
           esri.mapImage.findSublayerById(this.serviceLayer).visible = false;
           esri.mapImage.findSublayerById(this.rfLayer).visible = false;
           this.wetlandWatersheds = [];
-          // esri.mapView.graphics.remove(boundaryOutline);
-          // boundaryOutline = '';
           this.refreshSearch = false;
           this.firstSelected = false;
           this.h6 = false;
@@ -2815,7 +2814,7 @@ export default {
               _this.h8 = false;
               _this.h12 = true;
               _this.showServices = false;
-              _this.showCombined = true;
+              _this.showCombined = false;
               _this.startDownload = true;
               _this.showNumServices = true;
             }
@@ -2824,11 +2823,10 @@ export default {
 
             _this.rangeOfService = true;
             _this.wetlandIdString = '';
-            // _this.watershedAcres = 0;
             _this.watershedRange = [];
             let potentialId;
-            let boundaryOutline;
             esri.mapView.graphics.removeAll();
+            esri.boundaryOutline = '';
 
             let point = new Point({
               x: response.mapPoint.longitude,
@@ -2858,7 +2856,7 @@ export default {
                     _this.rfData = false;
                     let geom = result.features[0].geometry;
 
-                    boundaryOutline = new Graphic({
+                    esri.boundaryOutline = new Graphic({
                       geometry: geom,
                       symbol: {
                         type: 'simple-fill',
@@ -2872,7 +2870,7 @@ export default {
                       },
                     });
 
-                    esri.mapView.graphics.add(boundaryOutline);
+                    esri.mapView.graphics.add(esri.boundaryOutline);
 
                     _this.wetlandId = feature.wetlandIdString;
                     _this.floodAbatement = _this.numToRange(feature.FA_RANK);
@@ -2900,12 +2898,13 @@ export default {
                 });
 
               esri.rfWatershed.queryFeatures(query2).then(function(result) {
+                console.log(result);
                 if (result.features[0].attributes.WETLAND_TYPE == 'PRW') {
                   let feature = result.features[0].attributes;
                   _this.selectedData = false;
                   _this.rfData = false;
 
-                  boundaryOutline = new Graphic({
+                  esri.boundaryOutline = new Graphic({
                     geometry: result.features[0].geometry,
                     symbol: {
                       type: 'simple-fill',
@@ -2919,7 +2918,7 @@ export default {
                     },
                   });
 
-                  esri.mapView.graphics.add(boundaryOutline);
+                  esri.mapView.graphics.add(esri.boundaryOutline);
 
                   _this.wetlandId = feature.wetlandIdString;
                   _this.floodAbatement = _this.numToRange(feature.FA_RANK);
@@ -2956,7 +2955,7 @@ export default {
                 .then(function(result) {
                   let feature = result.features[0].attributes;
 
-                  boundaryOutline = new Graphic({
+                  esri.boundaryOutline = new Graphic({
                     geometry: result.features[0].geometry,
                     symbol: {
                       type: 'simple-fill',
@@ -2970,7 +2969,7 @@ export default {
                     },
                   });
 
-                  esri.mapView.graphics.add(boundaryOutline);
+                  esri.mapView.graphics.add(esri.boundaryOutline);
 
                   potentialId = feature.wetlandIdString;
 
